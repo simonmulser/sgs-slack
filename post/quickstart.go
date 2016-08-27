@@ -10,6 +10,7 @@ import (
   "reflect"
   "strconv"
   "time"
+  "math/rand"
   
   "google.golang.org/api/sheets/v4"
   "github.com/nlopes/slack"
@@ -56,9 +57,14 @@ func updateTrainingPost(row []interface{}, params TrainingParameters ) bytes.Buf
   buffer.WriteString(params.Going_sgs07)
   buffer.WriteString(" SGS07* und *");
   buffer.WriteString(params.Going_sgs16)
-  buffer.WriteString(" SGS16*.\n Für die Bälle zuständig: *");
-  buffer.WriteString(params.Responsible_balls)
-  buffer.WriteString("!*");
+  buffer.WriteString(" SGS16*.\n");
+
+  if(params.Responsible_balls != "") {
+    buffer.WriteString("Für die Bälle zuständig: *");
+    buffer.WriteString(params.Responsible_balls)
+    buffer.WriteString("!*");
+  }
+
   return buffer
  }
 
@@ -83,8 +89,10 @@ func updateTrainingPost(row []interface{}, params TrainingParameters ) bytes.Buf
   params.Going_sgs16 = strconv.Itoa(count_facepunch)
   params.Total_going = strconv.Itoa(count_muscle + count_facepunch)
 
-  user, _ := slackClient.GetUserInfo(going[0])
-  params.Responsible_balls = user.Name
+  if(len(going) > 0){
+    user, _ := slackClient.GetUserInfo(going[rand.Intn(len(going))])
+    params.Responsible_balls = user.Name    
+  }
 
   return params
  }
