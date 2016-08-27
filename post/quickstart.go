@@ -22,8 +22,6 @@ func toAlphabetChar(i int) string {
     return arr[i]
 }
 
-const TRAINING_SHEET = "1sKvrduUoKRfVk1QMaXwvps0IgAu6xUHhJ6XGSqJW68c"
-
 func createSlackClient(slack_key string) *slack.Client{
   slackClient := slack.New(slack_key);
   // slackClient.SetDebug(true)
@@ -50,14 +48,14 @@ func updateTrainingPost(row []interface{}, going int) bytes.Buffer {
   return buffer
  }
 
-func writeCell(service *sheets.Service, row int, column int, text string) {
+func writeCell(service *sheets.Service, sheet string, row int, column int, text string) {
   var update_columns [][]interface{}
   var  update_rows []interface{}
   update_columns = append(update_columns, append(update_rows, text)) 
 
   valueRange := sheets.ValueRange{Values: update_columns}
 
-  request := service.Spreadsheets.Values.Update(TRAINING_SHEET, 
+  request := service.Spreadsheets.Values.Update(sheet, 
     toAlphabetChar(column) + strconv.Itoa(row) + ":" + toAlphabetChar(column) + strconv.Itoa(row) , &valueRange)
 
   request.ValueInputOption("RAW")
@@ -73,7 +71,7 @@ func main() {
 
   slackClient := createSlackClient(config.SLACK_KEY)
 
-  response, error := service.Spreadsheets.Values.Get(TRAINING_SHEET, readRange).Do()
+  response, error := service.Spreadsheets.Values.Get(config.TRAINING_SHEET, readRange).Do()
   if error != nil {
     log.Fatalf("Unable to retrieve data from sheet. %v", error)
   }
@@ -92,10 +90,10 @@ func main() {
         if error != nil {
           log.Fatalf("Unable to update data from sheet. %v", error)
         }
-        writeCell(service, i, config.STATUS_COLUMN, "TRUE")          
-        writeCell(service, i, config.CHANNEL_ID_COLUMN, channelId)          
-        writeCell(service, i, config.TIMESTAMP_COLUMN, timestamp)          
-        writeCell(service, i, config.BALLS_COLUMN, "FALSE")          
+        writeCell(service, config.TRAINING_SHEET, i, config.STATUS_COLUMN, "TRUE")          
+        writeCell(service, config.TRAINING_SHEET, i, config.CHANNEL_ID_COLUMN, channelId)          
+        writeCell(service, config.TRAINING_SHEET, i, config.TIMESTAMP_COLUMN, timestamp)          
+        writeCell(service, config.TRAINING_SHEET, i, config.BALLS_COLUMN, "FALSE")          
       }
 
       i++
@@ -104,7 +102,7 @@ func main() {
       fmt.Print("No data found.")
     }
 
-  response, error = service.Spreadsheets.Values.Get(TRAINING_SHEET, readRange).Do()
+  response, error = service.Spreadsheets.Values.Get(config.TRAINING_SHEET, readRange).Do()
   if error != nil {
     log.Fatalf("Unable to retrieve data from sheet. %v", error)
   }
