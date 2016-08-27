@@ -9,10 +9,12 @@ import (
 type Config struct{
   TRAINING_SHEET string
   SLACK_KEY string
+  DATE_COLUMN int
   POSTING_DATE_COLUMN int
   STATUS_COLUMN int
   CHANNEL_ID_COLUMN int
   TIMESTAMP_COLUMN int
+  BALLS_COLUMN int
 }
 
 func Read() *Config{
