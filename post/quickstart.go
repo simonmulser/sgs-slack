@@ -17,10 +17,8 @@ import (
 
 const TRAINING_SHEET = "1sKvrduUoKRfVk1QMaXwvps0IgAu6xUHhJ6XGSqJW68c"
 
-func createSlackClient() *slack.Client{
-  config := config.Read()
-  fmt.Println(config.SLACK_KEY)
-  slackClient := slack.New(config.SLACK_KEY);
+func createSlackClient(slack_key string) *slack.Client{
+  slackClient := slack.New(slack_key);
   // slackClient.SetDebug(true)
 
   return slackClient;
@@ -52,6 +50,7 @@ func writeCell(service *sheets.Service, row int, column string, text string) {
 }
 
 func main() {
+  config := config.Read()
   service := google.New();
 
   readRange := "A2:F"
@@ -63,7 +62,7 @@ func main() {
   // fmt.Print(response)
   fmt.Println(reflect.TypeOf(service))
 
-  slackClient := createSlackClient()
+  slackClient := createSlackClient(config.SLACK_KEY)
 
   if len(response.Values) > 0 {
     i := 2
