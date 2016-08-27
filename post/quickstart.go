@@ -22,6 +22,13 @@ func toAlphabetChar(i int) string {
     return arr[i]
 }
 
+type TrainingParameters struct{
+  Total_going string
+  Going_sgs07 string
+  Going_sgs16 string
+  Responsible_balls string
+}
+
 func createSlackClient(slack_key string) *slack.Client{
   slackClient := slack.New(slack_key);
   // slackClient.SetDebug(true)
@@ -40,12 +47,46 @@ func createTrainingPost(row []interface{}) bytes.Buffer {
   return buffer
  }
 
-func updateTrainingPost(row []interface{}, going int) bytes.Buffer {
+func updateTrainingPost(row []interface{}, params TrainingParameters ) bytes.Buffer {
   buffer := createTrainingPost(row)
-  buffer.WriteString("\nEs sein `")
-  buffer.WriteString(strconv.Itoa(going))
-  buffer.WriteString("` dobei!")
+
+  buffer.WriteString("\nEs sein insgesomt *")
+  buffer.WriteString(params.Total_going)
+  buffer.WriteString("*, *");
+  buffer.WriteString(params.Going_sgs07)
+  buffer.WriteString(" SGS07* und *");
+  buffer.WriteString(params.Going_sgs16)
+  buffer.WriteString(" SGS16*.\n Für die Bälle zuständig: *");
+  buffer.WriteString(params.Responsible_balls)
+  buffer.WriteString("!*");
   return buffer
+ }
+
+ func createTrainingParams(reactions []slack.ItemReaction, slackClient *slack.Client) TrainingParameters {
+  var params TrainingParameters
+  var going []string
+  count_muscle := 0
+  count_facepunch := 0
+
+  for _,reaction := range reactions {
+    if(reaction.Name == "muscle"){
+      count_muscle= reaction.Count
+      going = append(going, reaction.Users...)
+      }
+    if(reaction.Name == "facepunch"){
+      count_facepunch = reaction.Count
+      going = append(going, reaction.Users...)
+      }
+    }
+
+  params.Going_sgs07 = strconv.Itoa(count_muscle)
+  params.Going_sgs16 = strconv.Itoa(count_facepunch)
+  params.Total_going = strconv.Itoa(count_muscle + count_facepunch)
+
+  user, _ := slackClient.GetUserInfo(going[0])
+  params.Responsible_balls = user.Name
+
+  return params
  }
 
 func writeCell(service *sheets.Service, sheet string, row int, column int, text string) {
@@ -118,16 +159,12 @@ func main() {
           if error != nil {
             log.Fatalf("Unable to update data from sheet. %v", error)
           }
-          for _,reaction := range reactions {
-            if(reaction.Name == "+1"){
-              message := updateTrainingPost(row, reaction.Count)
-              slackClient.UpdateMessage(row[config.CHANNEL_ID_COLUMN].(string),
-                row[config.TIMESTAMP_COLUMN].(string), message.String())
-            }
+
+          params := createTrainingParams(reactions, slackClient)
+          message := updateTrainingPost(row, params)
+          slackClient.UpdateMessage(row[config.CHANNEL_ID_COLUMN].(string),
+            row[config.TIMESTAMP_COLUMN].(string), message.String())
           }
-      }
-
-
       i++
       }
     } else {
