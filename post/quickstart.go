@@ -85,9 +85,14 @@ func main() {
           params := slack.NewPostMessageParameters()
           params.AsUser = true
           message := createTrainingPost(row)
-          slackClient.PostMessage("test", message, params)
+          channelId, timestamp, error := slackClient.PostMessage("test", message, params)
 
+          if error != nil {
+            log.Fatalf("Unable to update data from sheet. %v", error)
+          }
           writeCell(service, i, config.STATUS_COLUMN, "POSTED")          
+          writeCell(service, i, config.CHANNEL_ID_COLUMN, channelId)          
+          writeCell(service, i, config.TIMESTAMP_COLUMN, timestamp)          
           }
         }
 
