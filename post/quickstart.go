@@ -41,7 +41,7 @@ func createTrainingPost(row []interface{}) bytes.Buffer {
   buffer.WriteString(row[0].(string))
   buffer.WriteString(" am *")
   buffer.WriteString(row[2].(string))
-  buffer.WriteString(" um *")
+  buffer.WriteString(" um ")
   buffer.WriteString(row[3].(string))
   buffer.WriteString("*! Wer isch dobei?")
   return buffer
