@@ -78,23 +78,21 @@ func main() {
       if error != nil {
         log.Fatalf("Unable to update data from sheet. %v", error)
       }
-      if(row[config.STATUS_COLUMN] == "POSTED"){
-        postingDate, _ := time.Parse("02.01.2006", row[config.POSTING_DATE_COLUMN].(string))
-        if(time.Now().After(postingDate)){
-          fmt.Println(postingDate)
-          params := slack.NewPostMessageParameters()
-          params.AsUser = true
-          message := createTrainingPost(row)
-          channelId, timestamp, error := slackClient.PostMessage("test", message, params)
+      postingDate, _ := time.Parse("02.01.2006", row[config.POSTING_DATE_COLUMN].(string))
+      if(row[config.STATUS_COLUMN] == "FALSE" && time.Now().After(postingDate)){
+        fmt.Println(postingDate)
+        params := slack.NewPostMessageParameters()
+        params.AsUser = true
+        message := createTrainingPost(row)
+        channelId, timestamp, error := slackClient.PostMessage("test", message, params)
 
-          if error != nil {
-            log.Fatalf("Unable to update data from sheet. %v", error)
-          }
-          writeCell(service, i, config.STATUS_COLUMN, "POSTED")          
-          writeCell(service, i, config.CHANNEL_ID_COLUMN, channelId)          
-          writeCell(service, i, config.TIMESTAMP_COLUMN, timestamp)          
-          }
+        if error != nil {
+          log.Fatalf("Unable to update data from sheet. %v", error)
         }
+        writeCell(service, i, config.STATUS_COLUMN, "TRUE")          
+        writeCell(service, i, config.CHANNEL_ID_COLUMN, channelId)          
+        writeCell(service, i, config.TIMESTAMP_COLUMN, timestamp)          
+      }
 
         i++
       }
