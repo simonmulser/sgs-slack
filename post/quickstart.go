@@ -15,6 +15,13 @@ import (
   "github.com/nlopes/slack"
 )
 
+var arr = [...]string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
+    "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"}
+
+func toAlphabetChar(i int) string {
+    return arr[i]
+}
+
 const TRAINING_SHEET = "1sKvrduUoKRfVk1QMaXwvps0IgAu6xUHhJ6XGSqJW68c"
 
 func createSlackClient(slack_key string) *slack.Client{
@@ -35,7 +42,7 @@ func createTrainingPost(row []interface{}) string {
   return buffer.String()
  }
 
-func writeCell(service *sheets.Service, row int, column string, text string) {
+func writeCell(service *sheets.Service, row int, column int, text string) {
   var update_columns [][]interface{}
   var  update_rows []interface{}
   update_columns = append(update_columns, append(update_rows, text)) 
@@ -43,7 +50,7 @@ func writeCell(service *sheets.Service, row int, column string, text string) {
   valueRange := sheets.ValueRange{Values: update_columns}
 
   request := service.Spreadsheets.Values.Update(TRAINING_SHEET, 
-    column + strconv.Itoa(row) + ":" + column + strconv.Itoa(row) , &valueRange)
+    toAlphabetChar(column) + strconv.Itoa(row) + ":" + toAlphabetChar(column) + strconv.Itoa(row) , &valueRange)
 
   request.ValueInputOption("RAW")
   request.Do()
@@ -71,8 +78,8 @@ func main() {
       if error != nil {
         log.Fatalf("Unable to update data from sheet. %v", error)
       }
-      if(row[4] == "FALSE"){
-        postingDate, _ := time.Parse("02.01.2006", row[5].(string))
+      if(row[config.STATUS_COLUMN] == "POSTED"){
+        postingDate, _ := time.Parse("02.01.2006", row[config.POSTING_DATE_COLUMN].(string))
         if(time.Now().After(postingDate)){
           fmt.Println(postingDate)
           params := slack.NewPostMessageParameters()
@@ -80,7 +87,7 @@ func main() {
           message := createTrainingPost(row)
           slackClient.PostMessage("test", message, params)
 
-          writeCell(service, i, "E","FALSE")          
+          writeCell(service, i, config.STATUS_COLUMN, "POSTED")          
           }
         }
 
