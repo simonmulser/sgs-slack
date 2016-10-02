@@ -6,5 +6,15 @@
 	"CHANNEL_ID_COLUMN": 4,
 	"TIMESTAMP_COLUMN": 5,
 	"BALLS_COLUMN": 6,
-	"BALLS_RESPONSIBLE_TEXT": "Du bisch heint für die Trainingsutensilien zuständig!"
+	"BALLS_RESPONSIBLE_TEXT": "Du bisch heint für die Trainingsutensilien zuständig!",
+
+	"GAME_DATE_COLUMN": 0,
+	"GAME_POSTING_DATE_COLUMN": 1,
+	"HOME_COLUMN": 4,
+	"AWAY_COLUMN": 5,
+	"LOCATION_COLUMN": 6,
+	"LOCATION_MAPS_COLUMN": 7,
+	"SURFACE_COLUMN": 8,
+	"GAME_CHANNEL_ID_COLUMN": 9,
+	"GAME_TIMESTAMP_COLUMN": 10
 }

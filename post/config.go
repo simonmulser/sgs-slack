@@ -8,6 +8,7 @@ import (
 
 type Config struct{
   TRAINING_SHEET string
+  GAMES_07_SHEET string
   SLACK_KEY string
   TRAINING_CHANNEL string
   TRAINING_MGMT_CHANNEL string
@@ -19,6 +20,16 @@ type Config struct{
   TIMESTAMP_COLUMN int
   BALLS_COLUMN int
   BALLS_RESPONSIBLE_TEXT string
+
+  GAME_DATE_COLUMN int
+  GAME_POSTING_DATE_COLUMN int
+  HOME_COLUMN int
+  AWAY_COLUMN int
+  LOCATION_COLUMN int
+  LOCATION_MAPS_COLUMN int
+  SURFACE_COLUMN int
+  GAME_CHANNEL_ID_COLUMN int
+  GAME_TIMESTAMP_COLUMN int
 }
 
 func Read(env string) *Config{

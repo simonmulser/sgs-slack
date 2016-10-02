@@ -50,6 +50,32 @@ func (main Main) createTrainingPost(row []interface{}) bytes.Buffer {
   return buffer
  }
 
+ func (main Main) createGamePost(row []interface{}) bytes.Buffer {
+  var buffer bytes.Buffer
+
+  meetingTime, _ := time.Parse("02.01.2006 15:04", row[main.config.GAME_DATE_COLUMN].(string)) 
+  meetingTime = meetingTime.Add(-1 * 60 * time.Minute)
+
+  buffer.WriteString("*")
+  buffer.WriteString(row[main.config.HOME_COLUMN].(string))
+  buffer.WriteString(" : ")
+  buffer.WriteString(row[main.config.AWAY_COLUMN].(string))
+  buffer.WriteString("* am *")
+  buffer.WriteString(row[main.config.GAME_DATE_COLUMN].(string))
+  buffer.WriteString("* Uhr auf ")
+  buffer.WriteString(row[main.config.SURFACE_COLUMN].(string))
+  buffer.WriteString("! Treffpunkt: ")
+  buffer.WriteString(meetingTime.Format("15:04"))
+  buffer.WriteString(", ")
+  buffer.WriteString(row[main.config.LOCATION_COLUMN].(string))
+  buffer.WriteString(" - ")
+  buffer.WriteString(row[main.config.LOCATION_MAPS_COLUMN].(string))
+  buffer.WriteString(".")
+
+  return buffer
+ }
+
+
 func (main Main) createTrainingMgmtPost(row []interface{}, params TrainingParameters ) bytes.Buffer {
   var buffer bytes.Buffer
   buffer.WriteString("Ban Training heint (")
@@ -201,6 +227,32 @@ func (main Main) run() {
           main.postMessage("@" + params.Responsible_balls, main.config.BALLS_RESPONSIBLE_TEXT)
           main.writeCell(service, main.config.TRAINING_SHEET, i, main.config.BALLS_COLUMN, "TRUE")          
           }
+      i++
+      }
+    } else {
+      fmt.Print("No data found.")
+    }
+
+  response, error = service.Spreadsheets.Values.Get(main.config.GAMES_07_SHEET, "A2:K").Do()
+  if error != nil {
+    log.Fatalf("Unable to retrieve data from sheet. %v", error)
+  }
+  if false {
+    i := 2
+    for _, row := range response.Values {
+      postingDate, _ := time.Parse("02.01.2006 15:04", row[main.config.GAME_POSTING_DATE_COLUMN].(string))
+
+      if(row[main.config.GAME_CHANNEL_ID_COLUMN] == "FALSE" && main.timeNow().After(postingDate)){
+        message := main.createGamePost(row)
+        channelId, timestamp, error := main.postMessage(main.config.TRAINING_CHANNEL, message.String())
+
+        if error != nil {
+          log.Fatalf("Unable to update data from sheet. %v", error)
+        }
+        main.writeCell(service, main.config.GAMES_07_SHEET, i, main.config.GAME_CHANNEL_ID_COLUMN, channelId)
+        main.writeCell(service, main.config.GAMES_07_SHEET, i, main.config.GAME_TIMESTAMP_COLUMN, timestamp)
+      }
+
       i++
       }
     } else {
