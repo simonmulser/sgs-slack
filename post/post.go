@@ -171,7 +171,7 @@ func (main Main) run() {
   main.config = Read(env)
 
   service := New();
-  readRange := "A2:J"
+  readRange := "A2:G"
 
   fmt.Println(reflect.TypeOf(service))
 
