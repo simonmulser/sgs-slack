@@ -118,6 +118,15 @@ func (main Main) postMessage(channel string, message string) (string, string, er
   return main.slackClient.PostMessage(channel, message, params)
 }
 
+func (main Main) timeNow() time.Time {
+  t := time.Now()
+  utc, err := time.LoadLocation("Europe/Vienna")
+  if err != nil {
+    fmt.Println("err: ", err.Error())
+  }
+  return t.In(utc)
+}
+
 func main() {
   instance := Main{}
   instance.run()
@@ -146,9 +155,7 @@ func (main Main) run() {
     for _, row := range response.Values {
       postingDate, _ := time.Parse("02.01.2006 15:04", row[main.config.POSTING_DATE_COLUMN].(string))
 
-      if(row[main.config.CHANNEL_ID_COLUMN] == "FALSE" && time.Now().After(postingDate)){
-        fmt.Println(postingDate)
-
+      if(row[main.config.CHANNEL_ID_COLUMN] == "FALSE" && main.timeNow().After(postingDate)){
         message := main.createTrainingPost(row)
         channelId, timestamp, error := main.postMessage(main.config.TRAINING_CHANNEL, message.String())
 
@@ -173,8 +180,9 @@ func (main Main) run() {
     i := 2
     for _, row := range response.Values {
       date, _ := time.Parse("02.01.2006 15:04", row[main.config.DATE_COLUMN].(string))
+      date = date.Add(-8 * 60 * time.Minute)
 
-      if(row[main.config.CHANNEL_ID_COLUMN] != "FALSE" && row[main.config.BALLS_COLUMN] == "FALSE" && time.Now().After(date)){
+      if(row[main.config.CHANNEL_ID_COLUMN] != "FALSE" && row[main.config.BALLS_COLUMN] == "FALSE" && main.timeNow().After(date)){
           reactions, error := main.slackClient.GetReactions(
             slack.ItemRef{Channel: row[main.config.CHANNEL_ID_COLUMN].(string), Timestamp: row[main.config.TIMESTAMP_COLUMN].(string)},
             slack.GetReactionsParameters{})
