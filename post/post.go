@@ -8,6 +8,7 @@ import (
   "strconv"
   "time"
   "math/rand"
+  "os"
   
   "google.golang.org/api/sheets/v4"
   "github.com/nlopes/slack"
@@ -119,7 +120,12 @@ func main() {
 }
 
 func (main Main) run() {
-  main.config = Read()
+  env := "development"
+  if (len(os.Args) > 1) {
+    env = os.Args[1]
+  }
+  main.config = Read(env)
+
   service := New();
   readRange := "A2:J"
 
@@ -141,7 +147,7 @@ func (main Main) run() {
         params := slack.NewPostMessageParameters()
         params.AsUser = true
         message := main.createTrainingPost(row)
-        channelId, timestamp, error := slackClient.PostMessage("test", message.String(), params)
+        channelId, timestamp, error := slackClient.PostMessage(main.config.TRAINING_CHANNEL, message.String(), params)
 
         if error != nil {
           log.Fatalf("Unable to update data from sheet. %v", error)
