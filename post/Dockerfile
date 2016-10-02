@@ -14,6 +14,7 @@ RUN go get github.com/robfig/cron
 RUN go get golang.org/x/oauth2
 RUN go get golang.org/x/oauth2/google
 RUN go get google.golang.org/api/sheets/v4
+RUN go get github.com/golang/glog
 RUN go install github.com/simonmulser/sgs/post
 
 # cron stuff

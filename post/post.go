@@ -1,14 +1,13 @@
 package main
 
 import (
-  "fmt"
-  "log"
+  "github.com/golang/glog"
   "bytes"
-  "reflect"
   "strconv"
   "time"
   "math/rand"
   "os"
+  "flag"
   
   "google.golang.org/api/sheets/v4"
   "github.com/nlopes/slack"
@@ -53,7 +52,10 @@ func (main Main) createTrainingPost(row []interface{}) bytes.Buffer {
  func (main Main) createGamePost(row []interface{}) bytes.Buffer {
   var buffer bytes.Buffer
 
-  meetingTime, _ := time.Parse("02.01.2006 15:04", row[main.config.GAME_DATE_COLUMN].(string)) 
+  meetingTime, error := time.Parse("02.01.2006 15:04", row[main.config.GAME_DATE_COLUMN].(string)) 
+  if error != nil {
+    glog.Fatalf("Unable to parse date. %v", error)
+  }
   meetingTime = meetingTime.Add(-1 * 60 * time.Minute)
 
   buffer.WriteString("*")
@@ -122,7 +124,10 @@ func (main Main) createTrainingMgmtPost(row []interface{}, params TrainingParame
   params.Total_going = strconv.Itoa(count_muscle + count_facepunch)
 
   if(len(going) > 0){
-    user, _ := main.slackClient.GetUserInfo(going[rand.Intn(len(going))])
+    user, error := main.slackClient.GetUserInfo(going[rand.Intn(len(going))])
+    if error != nil {
+      glog.Fatalf("error: ", error.Error())
+    }
     params.Responsible_balls = user.Name    
   }
 
@@ -151,16 +156,22 @@ func (main Main) postMessage(channel string, message string) (string, string, er
 
 func (main Main) timeNow() time.Time {
   t := time.Now()
-  utc, err := time.LoadLocation("Europe/Vienna")
-  if err != nil {
-    fmt.Println("err: ", err.Error())
+  utc, error := time.LoadLocation("Europe/Vienna")
+  if error != nil {
+    glog.Info("error: ", error.Error())
   }
   return t.In(utc)
 }
 
 func main() {
+  flag.Parse()
+  flag.Lookup("logtostderr").Value.Set("true")
+  glog.Info("Program started")
+
   instance := Main{}
   instance.run()
+
+  glog.Info("Program terminated")
 }
 
 func (main Main) run() {
@@ -173,26 +184,27 @@ func (main Main) run() {
   service := New();
   readRange := "A2:G"
 
-  fmt.Println(reflect.TypeOf(service))
-
   main.slackClient = main.createSlackClient(main.config.SLACK_KEY)
 
   response, error := service.Spreadsheets.Values.Get(main.config.TRAINING_SHEET, readRange).Do()
   if error != nil {
-    log.Fatalf("Unable to retrieve data from sheet. %v", error)
+    glog.Fatalf("Unable to retrieve data from sheet. %v", error)
   }
   if len(response.Values) > 0 {
     i := 2
     for _, row := range response.Values {
-      postingDate, _ := time.Parse("02.01.2006 15:04", row[main.config.POSTING_DATE_COLUMN].(string))
+      postingDate, error := time.Parse("02.01.2006 15:04", row[main.config.POSTING_DATE_COLUMN].(string))
+      if error != nil {
+        glog.Fatalf("Unable to parse date. %v", error)
+      }
 
       if(row[main.config.CHANNEL_ID_COLUMN] == "FALSE" && main.timeNow().After(postingDate)){
         message := main.createTrainingPost(row)
         channelId, timestamp, error := main.postMessage(main.config.TRAINING_CHANNEL, message.String())
-
         if error != nil {
-          log.Fatalf("Unable to update data from sheet. %v", error)
+          glog.Fatalf("Unable to post message. %v", error)
         }
+
         main.writeCell(service, main.config.TRAINING_SHEET, i, main.config.CHANNEL_ID_COLUMN, channelId)          
         main.writeCell(service, main.config.TRAINING_SHEET, i, main.config.TIMESTAMP_COLUMN, timestamp)          
       }
@@ -200,17 +212,20 @@ func (main Main) run() {
       i++
       }
     } else {
-      fmt.Print("No data found.")
+      glog.Info("No data found.")
     }
 
   response, error = service.Spreadsheets.Values.Get(main.config.TRAINING_SHEET, readRange).Do()
   if error != nil {
-    log.Fatalf("Unable to retrieve data from sheet. %v", error)
+    glog.Fatalf("Unable to retrieve data from sheet. %v", error)
   }
   if len(response.Values) > 0 {
     i := 2
     for _, row := range response.Values {
-      date, _ := time.Parse("02.01.2006 15:04", row[main.config.DATE_COLUMN].(string))
+      date, error := time.Parse("02.01.2006 15:04", row[main.config.DATE_COLUMN].(string))
+      if error != nil {
+        glog.Fatalf("Unable to parse date. %v", error)
+      }
       date = date.Add(-8 * 60 * time.Minute)
 
       if(row[main.config.CHANNEL_ID_COLUMN] != "FALSE" && row[main.config.BALLS_COLUMN] == "FALSE" && main.timeNow().After(date)){
@@ -218,7 +233,7 @@ func (main Main) run() {
             slack.ItemRef{Channel: row[main.config.CHANNEL_ID_COLUMN].(string), Timestamp: row[main.config.TIMESTAMP_COLUMN].(string)},
             slack.GetReactionsParameters{})
           if error != nil {
-            log.Fatalf("Unable to update data from sheet. %v", error)
+            glog.Fatalf("Unable to get reactions. %v", error)
           }
 
           params := main.createTrainingParams(reactions)
@@ -230,25 +245,29 @@ func (main Main) run() {
       i++
       }
     } else {
-      fmt.Print("No data found.")
+      glog.Info("No data found.")
     }
 
   response, error = service.Spreadsheets.Values.Get(main.config.GAMES_07_SHEET, "A2:K").Do()
   if error != nil {
-    log.Fatalf("Unable to retrieve data from sheet. %v", error)
+    glog.Fatalf("Unable to retrieve data from sheet. %v", error)
   }
   if false {
+    if len(response.Values) > 0 {
     i := 2
     for _, row := range response.Values {
-      postingDate, _ := time.Parse("02.01.2006 15:04", row[main.config.GAME_POSTING_DATE_COLUMN].(string))
+      postingDate, error := time.Parse("02.01.2006 15:04", row[main.config.GAME_POSTING_DATE_COLUMN].(string))
+      if error != nil {
+        glog.Fatalf("Unable to parse date. %v", error)
+      }
 
       if(row[main.config.GAME_CHANNEL_ID_COLUMN] == "FALSE" && main.timeNow().After(postingDate)){
         message := main.createGamePost(row)
         channelId, timestamp, error := main.postMessage(main.config.TRAINING_CHANNEL, message.String())
-
         if error != nil {
-          log.Fatalf("Unable to update data from sheet. %v", error)
+          glog.Fatalf("Unable to post massage. %v", error)
         }
+
         main.writeCell(service, main.config.GAMES_07_SHEET, i, main.config.GAME_CHANNEL_ID_COLUMN, channelId)
         main.writeCell(service, main.config.GAMES_07_SHEET, i, main.config.GAME_TIMESTAMP_COLUMN, timestamp)
       }
@@ -256,6 +275,7 @@ func (main Main) run() {
       i++
       }
     } else {
-      fmt.Print("No data found.")
+      glog.Info("No data found.")
     }
+  }
 }
