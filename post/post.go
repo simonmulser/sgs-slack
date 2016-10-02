@@ -1,9 +1,6 @@
 package main
 
 import (
-  "github.com/simonmulser/config"
-  "github.com/simonmulser/google"
-
   "fmt"
   "log"
   "bytes"
@@ -30,26 +27,31 @@ type TrainingParameters struct{
   Responsible_balls string
 }
 
-func createSlackClient(slack_key string) *slack.Client{
+type Main struct{
+  config *Config
+}
+
+func (main Main) createSlackClient(slack_key string) *slack.Client{
   slackClient := slack.New(slack_key);
   // slackClient.SetDebug(true)
 
   return slackClient;
 }
 
-func createTrainingPost(row []interface{}) bytes.Buffer {
+func (main Main) createTrainingPost(row []interface{}) bytes.Buffer {
   var buffer bytes.Buffer
-  buffer.WriteString(row[0].(string))
+  buffer.WriteString(row[main.config.NAME_COLUMN].(string))
   buffer.WriteString(" am *")
-  buffer.WriteString(row[2].(string))
+  buffer.WriteString(row[main.config.DATE_COLUMN].(string))
   buffer.WriteString(" um ")
-  buffer.WriteString(row[3].(string))
-  buffer.WriteString("*! Wer isch dobei?")
+  buffer.WriteString(row[main.config.TIME_COLUMN].(string))
+  buffer.WriteString("*! ")
+  buffer.WriteString(row[main.config.DESCRIPTION_COLUMN].(string))
   return buffer
  }
 
-func updateTrainingPost(row []interface{}, params TrainingParameters ) bytes.Buffer {
-  buffer := createTrainingPost(row)
+func (main Main) updateTrainingPost(row []interface{}, params TrainingParameters ) bytes.Buffer {
+  buffer := main.createTrainingPost(row)
 
   buffer.WriteString("\nEs sein insgesomt *")
   buffer.WriteString(params.Total_going)
@@ -68,7 +70,7 @@ func updateTrainingPost(row []interface{}, params TrainingParameters ) bytes.Buf
   return buffer
  }
 
- func createTrainingParams(reactions []slack.ItemReaction, slackClient *slack.Client) TrainingParameters {
+ func (main Main) createTrainingParams(reactions []slack.ItemReaction, slackClient *slack.Client) TrainingParameters {
   var params TrainingParameters
   var going []string
   count_muscle := 0
@@ -97,7 +99,7 @@ func updateTrainingPost(row []interface{}, params TrainingParameters ) bytes.Buf
   return params
  }
 
-func writeCell(service *sheets.Service, sheet string, row int, column int, text string) {
+func (main Main) writeCell(service *sheets.Service, sheet string, row int, column int, text string) {
   var update_columns [][]interface{}
   var  update_rows []interface{}
   update_columns = append(update_columns, append(update_rows, text)) 
@@ -112,37 +114,40 @@ func writeCell(service *sheets.Service, sheet string, row int, column int, text 
 }
 
 func main() {
-  config := config.Read()
-  service := google.New();
+  instance := Main{}
+  instance.run()
+}
+
+func (main Main) run() {
+  main.config = Read()
+  service := New();
   readRange := "A2:J"
 
   fmt.Println(reflect.TypeOf(service))
 
-  slackClient := createSlackClient(config.SLACK_KEY)
+  slackClient := main.createSlackClient(main.config.SLACK_KEY)
 
-  response, error := service.Spreadsheets.Values.Get(config.TRAINING_SHEET, readRange).Do()
+  response, error := service.Spreadsheets.Values.Get(main.config.TRAINING_SHEET, readRange).Do()
   if error != nil {
     log.Fatalf("Unable to retrieve data from sheet. %v", error)
   }
   if len(response.Values) > 0 {
     i := 2
     for _, row := range response.Values {
-      postingDate, _ := time.Parse("02.01.2006", row[config.POSTING_DATE_COLUMN].(string))
+      postingDate, _ := time.Parse("02.01.2006", row[main.config.POSTING_DATE_COLUMN].(string))
 
-      if(row[config.STATUS_COLUMN] == "FALSE" && time.Now().After(postingDate)){
+      if(row[main.config.CHANNEL_ID_COLUMN] == "FALSE" && time.Now().After(postingDate)){
         fmt.Println(postingDate)
         params := slack.NewPostMessageParameters()
         params.AsUser = true
-        message := createTrainingPost(row)
+        message := main.createTrainingPost(row)
         channelId, timestamp, error := slackClient.PostMessage("test", message.String(), params)
 
         if error != nil {
           log.Fatalf("Unable to update data from sheet. %v", error)
         }
-        writeCell(service, config.TRAINING_SHEET, i, config.STATUS_COLUMN, "TRUE")          
-        writeCell(service, config.TRAINING_SHEET, i, config.CHANNEL_ID_COLUMN, channelId)          
-        writeCell(service, config.TRAINING_SHEET, i, config.TIMESTAMP_COLUMN, timestamp)          
-        writeCell(service, config.TRAINING_SHEET, i, config.BALLS_COLUMN, "FALSE")          
+        main.writeCell(service, main.config.TRAINING_SHEET, i, main.config.CHANNEL_ID_COLUMN, channelId)          
+        main.writeCell(service, main.config.TRAINING_SHEET, i, main.config.TIMESTAMP_COLUMN, timestamp)          
       }
 
       i++
@@ -151,27 +156,28 @@ func main() {
       fmt.Print("No data found.")
     }
 
-  response, error = service.Spreadsheets.Values.Get(config.TRAINING_SHEET, readRange).Do()
+  response, error = service.Spreadsheets.Values.Get(main.config.TRAINING_SHEET, readRange).Do()
   if error != nil {
     log.Fatalf("Unable to retrieve data from sheet. %v", error)
   }
   if len(response.Values) > 0 {
     i := 2
     for _, row := range response.Values {
-      date, _ := time.Parse("02.01.2006", row[config.DATE_COLUMN].(string))
+      date, _ := time.Parse("02.01.2006", row[main.config.DATE_COLUMN].(string))
       
-      if(row[config.STATUS_COLUMN] == "TRUE" && row[config.BALLS_COLUMN] == "FALSE" && time.Now().After(date)){
+      if(row[main.config.CHANNEL_ID_COLUMN] != "FALSE" && row[main.config.BALLS_COLUMN] == "FALSE" && time.Now().After(date)){
           reactions, error := slackClient.GetReactions(
-            slack.ItemRef{Channel: row[config.CHANNEL_ID_COLUMN].(string), Timestamp: row[config.TIMESTAMP_COLUMN].(string)},
+            slack.ItemRef{Channel: row[main.config.CHANNEL_ID_COLUMN].(string), Timestamp: row[main.config.TIMESTAMP_COLUMN].(string)},
             slack.GetReactionsParameters{})
           if error != nil {
             log.Fatalf("Unable to update data from sheet. %v", error)
           }
 
-          params := createTrainingParams(reactions, slackClient)
-          message := updateTrainingPost(row, params)
-          slackClient.UpdateMessage(row[config.CHANNEL_ID_COLUMN].(string),
-            row[config.TIMESTAMP_COLUMN].(string), message.String())
+          params := main.createTrainingParams(reactions, slackClient)
+          message := main.updateTrainingPost(row, params)
+          slackClient.UpdateMessage(row[main.config.CHANNEL_ID_COLUMN].(string),
+            row[main.config.TIMESTAMP_COLUMN].(string), message.String())
+          main.writeCell(service, main.config.TRAINING_SHEET, i, main.config.BALLS_COLUMN, "TRUE")          
           }
       i++
       }

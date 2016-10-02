@@ -1,0 +1,1 @@
+0 12 * * * root bash /go/src/github.com/simonmulser/sgs/post/run.sh >> /var/log/cron.log 2>&1

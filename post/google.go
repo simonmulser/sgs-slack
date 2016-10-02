@@ -1,4 +1,4 @@
-package google
+package main
 
 import (
   "fmt"
