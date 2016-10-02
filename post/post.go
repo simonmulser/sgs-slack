@@ -50,9 +50,14 @@ func (main Main) createTrainingPost(row []interface{}) bytes.Buffer {
   return buffer
  }
 
-func (main Main) updateTrainingPost(row []interface{}, params TrainingParameters ) bytes.Buffer {
+func (main Main) createTrainingMgmtPost(row []interface{}, params TrainingParameters ) bytes.Buffer {
   var buffer bytes.Buffer
-  buffer.WriteString("Es sein insgesomt *")
+  buffer.WriteString("Ban Training heint (")
+  buffer.WriteString(row[main.config.NAME_COLUMN].(string))
+  buffer.WriteString(" - ")
+  buffer.WriteString(row[main.config.DATE_COLUMN].(string))
+  buffer.WriteString(")")
+  buffer.WriteString(" sein insgesomt *")
   buffer.WriteString(params.Total_going)
   buffer.WriteString("*, *");
   buffer.WriteString(params.Going_sgs07)
@@ -191,7 +196,7 @@ func (main Main) run() {
           }
 
           params := main.createTrainingParams(reactions)
-          message := main.updateTrainingPost(row, params)
+          message := main.createTrainingMgmtPost(row, params)
           main.postMessage(main.config.TRAINING_MGMT_CHANNEL, message.String())
           main.postMessage("@" + params.Responsible_balls, main.config.BALLS_RESPONSIBLE_TEXT)
           main.writeCell(service, main.config.TRAINING_SHEET, i, main.config.BALLS_COLUMN, "TRUE")          
