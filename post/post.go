@@ -45,9 +45,7 @@ func (main Main) createTrainingPost(row []interface{}) bytes.Buffer {
   buffer.WriteString(row[main.config.NAME_COLUMN].(string))
   buffer.WriteString(" am *")
   buffer.WriteString(row[main.config.DATE_COLUMN].(string))
-  buffer.WriteString(" um ")
-  buffer.WriteString(row[main.config.TIME_COLUMN].(string))
-  buffer.WriteString("*! ")
+  buffer.WriteString("* Uhr! ")
   buffer.WriteString(row[main.config.DESCRIPTION_COLUMN].(string))
   return buffer
  }
@@ -146,7 +144,7 @@ func (main Main) run() {
   if len(response.Values) > 0 {
     i := 2
     for _, row := range response.Values {
-      postingDate, _ := time.Parse("02.01.2006", row[main.config.POSTING_DATE_COLUMN].(string))
+      postingDate, _ := time.Parse("02.01.2006 15:04", row[main.config.POSTING_DATE_COLUMN].(string))
 
       if(row[main.config.CHANNEL_ID_COLUMN] == "FALSE" && time.Now().After(postingDate)){
         fmt.Println(postingDate)
@@ -174,7 +172,7 @@ func (main Main) run() {
   if len(response.Values) > 0 {
     i := 2
     for _, row := range response.Values {
-      date, _ := time.Parse("02.01.2006", row[main.config.DATE_COLUMN].(string))
+      date, _ := time.Parse("02.01.2006 15:04", row[main.config.DATE_COLUMN].(string))
 
       if(row[main.config.CHANNEL_ID_COLUMN] != "FALSE" && row[main.config.BALLS_COLUMN] == "FALSE" && time.Now().After(date)){
           reactions, error := main.slackClient.GetReactions(
