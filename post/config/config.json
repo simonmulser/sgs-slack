@@ -1,0 +1,10 @@
+{
+	"NAME_COLUMN": 0,
+	"DESCRIPTION_COLUMN": 1,
+	"DATE_COLUMN": 2,
+	"POSTING_DATE_COLUMN": 3,
+	"CHANNEL_ID_COLUMN": 4,
+	"TIMESTAMP_COLUMN": 5,
+	"BALLS_COLUMN": 6,
+	"BALLS_RESPONSIBLE_TEXT": "Du bisch heint für die Trainingsutensilien zuständig!"
+}

@@ -31,9 +31,9 @@ func Read(env string) *Config{
   }
 
   if (env == "development"){
-    file, _ = os.Open("config/development-config.json")
+    file, _ = os.Open("config/connections/development-config.json")
   } else if (env == "production"){
-    file, _ = os.Open("config/production-config.json")
+    file, _ = os.Open("config/connections/production-config.json")
   } else {
     fmt.Println("error: unkown env")
   }
