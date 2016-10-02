@@ -10,6 +10,7 @@ type Config struct{
   TRAINING_SHEET string
   SLACK_KEY string
   TRAINING_CHANNEL string
+  TRAINING_MGMT_CHANNEL string
   NAME_COLUMN int
   DESCRIPTION_COLUMN int
   DATE_COLUMN int
@@ -18,6 +19,7 @@ type Config struct{
   CHANNEL_ID_COLUMN int
   TIMESTAMP_COLUMN int
   BALLS_COLUMN int
+  BALLS_RESPONSIBLE_TEXT string
 }
 
 func Read(env string) *Config{

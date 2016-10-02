@@ -30,6 +30,7 @@ type TrainingParameters struct{
 
 type Main struct{
   config *Config
+  slackClient *slack.Client
 }
 
 func (main Main) createSlackClient(slack_key string) *slack.Client{
@@ -52,9 +53,8 @@ func (main Main) createTrainingPost(row []interface{}) bytes.Buffer {
  }
 
 func (main Main) updateTrainingPost(row []interface{}, params TrainingParameters ) bytes.Buffer {
-  buffer := main.createTrainingPost(row)
-
-  buffer.WriteString("\nEs sein insgesomt *")
+  var buffer bytes.Buffer
+  buffer.WriteString("Es sein insgesomt *")
   buffer.WriteString(params.Total_going)
   buffer.WriteString("*, *");
   buffer.WriteString(params.Going_sgs07)
@@ -71,7 +71,7 @@ func (main Main) updateTrainingPost(row []interface{}, params TrainingParameters
   return buffer
  }
 
- func (main Main) createTrainingParams(reactions []slack.ItemReaction, slackClient *slack.Client) TrainingParameters {
+ func (main Main) createTrainingParams(reactions []slack.ItemReaction) TrainingParameters {
   var params TrainingParameters
   var going []string
   count_muscle := 0
@@ -93,7 +93,7 @@ func (main Main) updateTrainingPost(row []interface{}, params TrainingParameters
   params.Total_going = strconv.Itoa(count_muscle + count_facepunch)
 
   if(len(going) > 0){
-    user, _ := slackClient.GetUserInfo(going[rand.Intn(len(going))])
+    user, _ := main.slackClient.GetUserInfo(going[rand.Intn(len(going))])
     params.Responsible_balls = user.Name    
   }
 
@@ -114,6 +114,12 @@ func (main Main) writeCell(service *sheets.Service, sheet string, row int, colum
   request.Do()
 }
 
+func (main Main) postMessage(channel string, message string) (string, string, error) {
+  params := slack.NewPostMessageParameters()
+  params.AsUser = true
+  return main.slackClient.PostMessage(channel, message, params)
+}
+
 func main() {
   instance := Main{}
   instance.run()
@@ -131,7 +137,7 @@ func (main Main) run() {
 
   fmt.Println(reflect.TypeOf(service))
 
-  slackClient := main.createSlackClient(main.config.SLACK_KEY)
+  main.slackClient = main.createSlackClient(main.config.SLACK_KEY)
 
   response, error := service.Spreadsheets.Values.Get(main.config.TRAINING_SHEET, readRange).Do()
   if error != nil {
@@ -144,10 +150,9 @@ func (main Main) run() {
 
       if(row[main.config.CHANNEL_ID_COLUMN] == "FALSE" && time.Now().After(postingDate)){
         fmt.Println(postingDate)
-        params := slack.NewPostMessageParameters()
-        params.AsUser = true
+
         message := main.createTrainingPost(row)
-        channelId, timestamp, error := slackClient.PostMessage(main.config.TRAINING_CHANNEL, message.String(), params)
+        channelId, timestamp, error := main.postMessage(main.config.TRAINING_CHANNEL, message.String())
 
         if error != nil {
           log.Fatalf("Unable to update data from sheet. %v", error)
@@ -170,19 +175,19 @@ func (main Main) run() {
     i := 2
     for _, row := range response.Values {
       date, _ := time.Parse("02.01.2006", row[main.config.DATE_COLUMN].(string))
-      
+
       if(row[main.config.CHANNEL_ID_COLUMN] != "FALSE" && row[main.config.BALLS_COLUMN] == "FALSE" && time.Now().After(date)){
-          reactions, error := slackClient.GetReactions(
+          reactions, error := main.slackClient.GetReactions(
             slack.ItemRef{Channel: row[main.config.CHANNEL_ID_COLUMN].(string), Timestamp: row[main.config.TIMESTAMP_COLUMN].(string)},
             slack.GetReactionsParameters{})
           if error != nil {
             log.Fatalf("Unable to update data from sheet. %v", error)
           }
 
-          params := main.createTrainingParams(reactions, slackClient)
+          params := main.createTrainingParams(reactions)
           message := main.updateTrainingPost(row, params)
-          slackClient.UpdateMessage(row[main.config.CHANNEL_ID_COLUMN].(string),
-            row[main.config.TIMESTAMP_COLUMN].(string), message.String())
+          main.postMessage(main.config.TRAINING_MGMT_CHANNEL, message.String())
+          main.postMessage("@" + params.Responsible_balls, main.config.BALLS_RESPONSIBLE_TEXT)
           main.writeCell(service, main.config.TRAINING_SHEET, i, main.config.BALLS_COLUMN, "TRUE")          
           }
       i++
