@@ -184,11 +184,11 @@ func (main Main) run() {
       glog.Info("No data found.")
     }
 
+if false {
   response, error = service.Spreadsheets.Values.Get(main.config.GAMES_07_SHEET, "A2:K").Do()
   if error != nil {
     glog.Fatalf("Unable to retrieve data from sheet. %v", error)
   }
-  if false {
     if len(response.Values) > 0 {
     i := 2
     for _, row := range response.Values {
