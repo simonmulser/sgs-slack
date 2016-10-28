@@ -8,7 +8,6 @@ import (
   "os"
   "flag"
   
-  "google.golang.org/api/sheets/v4"
   "github.com/nlopes/slack"
 )
 
@@ -29,13 +28,6 @@ type TrainingParameters struct{
 type Main struct{
   config *Config
   slackClient *slack.Client
-}
-
-func (main Main) createSlackClient(slack_key string) *slack.Client{
-  slackClient := slack.New(slack_key);
-  // slackClient.SetDebug(true)
-
-  return slackClient;
 }
 
  func (main Main) createTrainingParams(reactions []slack.ItemReaction) TrainingParameters {
@@ -69,26 +61,6 @@ func (main Main) createSlackClient(slack_key string) *slack.Client{
 
   return params
  }
-
-func (main Main) writeCell(service *sheets.Service, sheet string, row int, column int, text string) {
-  var update_columns [][]interface{}
-  var  update_rows []interface{}
-  update_columns = append(update_columns, append(update_rows, text)) 
-
-  valueRange := sheets.ValueRange{Values: update_columns}
-
-  request := service.Spreadsheets.Values.Update(sheet, 
-    toAlphabetChar(column) + strconv.Itoa(row) + ":" + toAlphabetChar(column) + strconv.Itoa(row) , &valueRange)
-
-  request.ValueInputOption("RAW")
-  request.Do()
-}
-
-func (main Main) postMessage(channel string, message string) (string, string, error) {
-  params := slack.NewPostMessageParameters()
-  params.AsUser = true
-  return main.slackClient.PostMessage(channel, message, params)
-}
 
 func (main Main) timeNow() time.Time {
   t := time.Now()
