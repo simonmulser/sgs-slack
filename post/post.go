@@ -2,9 +2,7 @@ package main
 
 import (
   "github.com/golang/glog"
-  "strconv"
   "time"
-  "math/rand"
   "os"
   "flag"
   
@@ -12,50 +10,11 @@ import (
   "google.golang.org/api/sheets/v4"
 )
 
-type TrainingParameters struct{
-  Total_going string
-  Going_sgs07 string
-  Going_sgs16 string
-  Responsible_balls string
-}
-
 type Main struct{
   config *Config
   slackClient *slack.Client
   service *sheets.Service
 }
-
- func (main Main) createTrainingParams(reactions []slack.ItemReaction) TrainingParameters {
-  var params TrainingParameters
-  var going []string
-  count_muscle := 0
-  count_facepunch := 0
-
-  for _,reaction := range reactions {
-    if(reaction.Name == "muscle"){
-      count_muscle= reaction.Count
-      going = append(going, reaction.Users...)
-      }
-    if(reaction.Name == "facepunch"){
-      count_facepunch = reaction.Count
-      going = append(going, reaction.Users...)
-      }
-    }
-
-  params.Going_sgs07 = strconv.Itoa(count_muscle)
-  params.Going_sgs16 = strconv.Itoa(count_facepunch)
-  params.Total_going = strconv.Itoa(count_muscle + count_facepunch)
-
-  if(len(going) > 0){
-    user, error := main.slackClient.GetUserInfo(going[rand.Intn(len(going))])
-    if error != nil {
-      glog.Fatalf("error: ", error.Error())
-    }
-    params.Responsible_balls = user.Name    
-  }
-
-  return params
- }
 
 func main() {
   flag.Parse()
