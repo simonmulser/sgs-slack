@@ -12,12 +12,12 @@ import (
 
 type MessageBuilder struct{
   config *Config
-  slackClient *SlackClient
+  slackService *SlackService
 }
 
-func NewMessageBuilder(config *Config, slackClient *SlackClient) *MessageBuilder{
+func NewMessageBuilder(config *Config, slackService *SlackService) *MessageBuilder{
   messageBuilder := new(MessageBuilder)
-  messageBuilder.slackClient = slackClient
+  messageBuilder.slackService = slackService
   messageBuilder.config = config
 
   return messageBuilder
@@ -114,7 +114,7 @@ func (messageBuilder MessageBuilder) createTrainingParams(reactions []slack.Item
   params.Total_going = strconv.Itoa(count_muscle + count_facepunch)
 
   if(len(going) > 0){
-    user, error := messageBuilder.slackClient.slack.GetUserInfo(going[rand.Intn(len(going))])
+    user, error := messageBuilder.slackService.slack.GetUserInfo(going[rand.Intn(len(going))])
     if error != nil {
       glog.Fatalf("error: ", error.Error())
     }

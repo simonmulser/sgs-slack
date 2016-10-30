@@ -12,7 +12,7 @@ import (
 
 type Main struct{
   config *Config
-  slackClient *SlackClient
+  slackService *SlackService
   service *sheets.Service
   messageBuilder *MessageBuilder
 }
@@ -29,8 +29,8 @@ func main() {
 
   instance := Main{}
   instance.config = Read(env)
-  instance.slackClient = NewSlackClient(instance.config.SLACK_KEY)
-  instance.messageBuilder = NewMessageBuilder(instance.config, instance.slackClient)
+  instance.slackService = NewSlackService(instance.config.SLACK_KEY)
+  instance.messageBuilder = NewMessageBuilder(instance.config, instance.slackService)
   instance.service = New();
 
   instance.run()
@@ -51,7 +51,7 @@ func (main Main) run() {
 
       if(row[main.config.CHANNEL_ID_COLUMN] == "FALSE" && timeNow().After(postingDate)){
         message := main.messageBuilder.createTrainingPost(row)
-        channelId, timestamp, error := main.slackClient.postMessage(main.config.TRAINING_CHANNEL, message.String())
+        channelId, timestamp, error := main.slackService.postMessage(main.config.TRAINING_CHANNEL, message.String())
         if error != nil {
           glog.Fatalf("Unable to post message. %v", error)
         }
@@ -78,7 +78,7 @@ func (main Main) run() {
       date = date.Add(-8 * 60 * time.Minute)
 
       if(row[main.config.CHANNEL_ID_COLUMN] != "FALSE" && row[main.config.TRAINING_UTENSILS_COLUMN] == "FALSE" && timeNow().After(date)){
-          reactions, error := main.slackClient.slack.GetReactions(
+          reactions, error := main.slackService.slack.GetReactions(
             slack.ItemRef{Channel: row[main.config.CHANNEL_ID_COLUMN].(string), Timestamp: row[main.config.TIMESTAMP_COLUMN].(string)},
             slack.GetReactionsParameters{})
           if error != nil {
@@ -87,8 +87,8 @@ func (main Main) run() {
 
           params := main.messageBuilder.createTrainingParams(reactions)
           message := main.messageBuilder.createTrainingMgmtPost(row, params)
-          main.slackClient.postMessage(main.config.TRAINING_MGMT_CHANNEL, message.String())
-          main.slackClient.postMessage("@" + params.Responsible_training_utensils, main.config.TRAINING_UTENSILS_RESPONSIBLE_TEXT)
+          main.slackService.postMessage(main.config.TRAINING_MGMT_CHANNEL, message.String())
+          main.slackService.postMessage("@" + params.Responsible_training_utensils, main.config.TRAINING_UTENSILS_RESPONSIBLE_TEXT)
           main.writeCell(main.config.TRAINING_SHEET, i, main.config.TRAINING_UTENSILS_COLUMN, "TRUE")
           }
       i++
@@ -110,7 +110,7 @@ if false {
 
       if(row[main.config.GAME_CHANNEL_ID_COLUMN] == "FALSE" && timeNow().After(postingDate)){
         message := main.messageBuilder.createGamePost(row)
-        channelId, timestamp, error := main.slackClient.postMessage(main.config.TRAINING_CHANNEL, message.String())
+        channelId, timestamp, error := main.slackService.postMessage(main.config.TRAINING_CHANNEL, message.String())
         if error != nil {
           glog.Fatalf("Unable to post massage. %v", error)
         }
