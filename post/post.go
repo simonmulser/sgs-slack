@@ -76,7 +76,7 @@ func (main Main) run() {
       }
       date = date.Add(-8 * 60 * time.Minute)
 
-      if(row[main.config.CHANNEL_ID_COLUMN] != "FALSE" && row[main.config.BALLS_COLUMN] == "FALSE" && timeNow().After(date)){
+      if(row[main.config.CHANNEL_ID_COLUMN] != "FALSE" && row[main.config.TRAINING_UTENSILS_COLUMN] == "FALSE" && timeNow().After(date)){
           reactions, error := main.slackClient.GetReactions(
             slack.ItemRef{Channel: row[main.config.CHANNEL_ID_COLUMN].(string), Timestamp: row[main.config.TIMESTAMP_COLUMN].(string)},
             slack.GetReactionsParameters{})
@@ -87,8 +87,8 @@ func (main Main) run() {
           params := main.createTrainingParams(reactions)
           message := main.createTrainingMgmtPost(row, params)
           main.postMessage(main.config.TRAINING_MGMT_CHANNEL, message.String())
-          main.postMessage("@" + params.Responsible_balls, main.config.BALLS_RESPONSIBLE_TEXT)
-          main.writeCell(main.config.TRAINING_SHEET, i, main.config.BALLS_COLUMN, "TRUE")
+          main.postMessage("@" + params.Responsible_training_utensils, main.config.TRAINING_UTENSILS_RESPONSIBLE_TEXT)
+          main.writeCell(main.config.TRAINING_SHEET, i, main.config.TRAINING_UTENSILS_COLUMN, "TRUE")
           }
       i++
       }

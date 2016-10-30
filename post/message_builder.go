@@ -14,7 +14,7 @@ type TrainingParameters struct{
   Total_going string
   Going_sgs07 string
   Going_sgs16 string
-  Responsible_balls string
+  Responsible_training_utensils string
 }
 
 func (main Main) createTrainingPost(row []interface{}) bytes.Buffer {
@@ -70,9 +70,9 @@ func (main Main) createTrainingMgmtPost(row []interface{}, params TrainingParame
   buffer.WriteString(params.Going_sgs16)
   buffer.WriteString(" SGS16*.\n");
 
-  if(params.Responsible_balls != "") {
-    buffer.WriteString("Für die Bälle zuständig: *");
-    buffer.WriteString(params.Responsible_balls)
+  if(params.Responsible_training_utensils != "") {
+    buffer.WriteString("Für Trainingsutensilien zuständig: *");
+    buffer.WriteString(params.Responsible_training_utensils)
     buffer.WriteString("!*");
   }
 
@@ -105,7 +105,7 @@ func (main Main) createTrainingParams(reactions []slack.ItemReaction) TrainingPa
     if error != nil {
       glog.Fatalf("error: ", error.Error())
     }
-    params.Responsible_balls = user.Name
+    params.Responsible_training_utensils = user.Name
   }
 
   return params
