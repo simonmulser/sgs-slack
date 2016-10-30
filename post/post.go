@@ -9,6 +9,7 @@ import (
   "flag"
   
   "github.com/nlopes/slack"
+  "google.golang.org/api/sheets/v4"
 )
 
 var arr = [...]string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
@@ -28,6 +29,7 @@ type TrainingParameters struct{
 type Main struct{
   config *Config
   slackClient *slack.Client
+  service *sheets.Service
 }
 
  func (main Main) createTrainingParams(reactions []slack.ItemReaction) TrainingParameters {
@@ -89,18 +91,15 @@ func (main Main) run() {
   }
   main.config = Read(env)
 
-  service := New();
-  readRange := "A2:G"
+  main.service = New();
 
   main.slackClient = main.createSlackClient(main.config.SLACK_KEY)
 
-  response, error := service.Spreadsheets.Values.Get(main.config.TRAINING_SHEET, readRange).Do()
-  if error != nil {
-    glog.Fatalf("Unable to retrieve data from sheet. %v", error)
-  }
-  if len(response.Values) > 0 {
+  var rows = main.readRange(main.config.TRAINING_SHEET ,"A2:G")
+
+  if len(rows.Values) > 0 {
     i := 2
-    for _, row := range response.Values {
+    for _, row := range rows.Values {
       postingDate, error := time.Parse("02.01.2006 15:04", row[main.config.POSTING_DATE_COLUMN].(string))
       if error != nil {
         glog.Fatalf("Unable to parse date. %v", error)
@@ -113,8 +112,8 @@ func (main Main) run() {
           glog.Fatalf("Unable to post message. %v", error)
         }
 
-        main.writeCell(service, main.config.TRAINING_SHEET, i, main.config.CHANNEL_ID_COLUMN, channelId)          
-        main.writeCell(service, main.config.TRAINING_SHEET, i, main.config.TIMESTAMP_COLUMN, timestamp)          
+        main.writeCell(main.config.TRAINING_SHEET, i, main.config.CHANNEL_ID_COLUMN, channelId)
+        main.writeCell(main.config.TRAINING_SHEET, i, main.config.TIMESTAMP_COLUMN, timestamp)
       }
 
       i++
@@ -123,13 +122,11 @@ func (main Main) run() {
       glog.Info("No data found.")
     }
 
-  response, error = service.Spreadsheets.Values.Get(main.config.TRAINING_SHEET, readRange).Do()
-  if error != nil {
-    glog.Fatalf("Unable to retrieve data from sheet. %v", error)
-  }
-  if len(response.Values) > 0 {
+  rows = main.readRange(main.config.TRAINING_SHEET, "A2:G")
+
+  if len(rows.Values) > 0 {
     i := 2
-    for _, row := range response.Values {
+    for _, row := range rows.Values {
       date, error := time.Parse("02.01.2006 15:04", row[main.config.DATE_COLUMN].(string))
       if error != nil {
         glog.Fatalf("Unable to parse date. %v", error)
@@ -148,7 +145,7 @@ func (main Main) run() {
           message := main.createTrainingMgmtPost(row, params)
           main.postMessage(main.config.TRAINING_MGMT_CHANNEL, message.String())
           main.postMessage("@" + params.Responsible_balls, main.config.BALLS_RESPONSIBLE_TEXT)
-          main.writeCell(service, main.config.TRAINING_SHEET, i, main.config.BALLS_COLUMN, "TRUE")          
+          main.writeCell(main.config.TRAINING_SHEET, i, main.config.BALLS_COLUMN, "TRUE")
           }
       i++
       }
@@ -157,13 +154,11 @@ func (main Main) run() {
     }
 
 if false {
-  response, error = service.Spreadsheets.Values.Get(main.config.GAMES_07_SHEET, "A2:K").Do()
-  if error != nil {
-    glog.Fatalf("Unable to retrieve data from sheet. %v", error)
-  }
-    if len(response.Values) > 0 {
+  rows = main.readRange(main.config.GAMES_07_SHEET, "A2:K")
+
+    if len(rows.Values) > 0 {
     i := 2
-    for _, row := range response.Values {
+    for _, row := range rows.Values {
       postingDate, error := time.Parse("02.01.2006 15:04", row[main.config.GAME_POSTING_DATE_COLUMN].(string))
       if error != nil {
         glog.Fatalf("Unable to parse date. %v", error)
@@ -176,8 +171,8 @@ if false {
           glog.Fatalf("Unable to post massage. %v", error)
         }
 
-        main.writeCell(service, main.config.GAMES_07_SHEET, i, main.config.GAME_CHANNEL_ID_COLUMN, channelId)
-        main.writeCell(service, main.config.GAMES_07_SHEET, i, main.config.GAME_TIMESTAMP_COLUMN, timestamp)
+        main.writeCell(main.config.GAMES_07_SHEET, i, main.config.GAME_CHANNEL_ID_COLUMN, channelId)
+        main.writeCell(main.config.GAMES_07_SHEET, i, main.config.GAME_TIMESTAMP_COLUMN, timestamp)
       }
 
       i++
