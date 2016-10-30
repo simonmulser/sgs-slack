@@ -15,6 +15,14 @@ type MessageBuilder struct{
   slackClient *SlackClient
 }
 
+func NewMessageBuilder(config *Config, slackClient *SlackClient) *MessageBuilder{
+  messageBuilder := new(MessageBuilder)
+  messageBuilder.slackClient = slackClient
+  messageBuilder.config = config
+
+  return messageBuilder
+}
+
 type TrainingParameters struct{
   Total_going string
   Going_sgs07 string

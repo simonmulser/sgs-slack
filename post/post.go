@@ -14,7 +14,7 @@ type Main struct{
   config *Config
   slackClient *SlackClient
   service *sheets.Service
-  messageBuilder MessageBuilder
+  messageBuilder *MessageBuilder
 }
 
 func main() {
@@ -30,7 +30,7 @@ func main() {
   instance := Main{}
   instance.config = Read(env)
   instance.slackClient = NewSlackClient(instance.config.SLACK_KEY)
-  instance.messageBuilder = MessageBuilder{instance.config, instance.slackClient}
+  instance.messageBuilder = NewMessageBuilder(instance.config, instance.slackClient)
   instance.service = New();
 
   instance.run()
