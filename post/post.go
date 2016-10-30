@@ -7,13 +7,12 @@ import (
   "flag"
   
   "github.com/nlopes/slack"
-  "google.golang.org/api/sheets/v4"
 )
 
 type Main struct{
   config *Config
   slackService *SlackService
-  service *sheets.Service
+  spreadsheetService *SpreadsheetService
   messageBuilder *MessageBuilder
 }
 
@@ -31,7 +30,7 @@ func main() {
   instance.config = Read(env)
   instance.slackService = NewSlackService(instance.config.SLACK_KEY)
   instance.messageBuilder = NewMessageBuilder(instance.config, instance.slackService)
-  instance.service = New();
+  instance.spreadsheetService = NewSpreadsheetService()
 
   instance.run()
 
@@ -39,7 +38,7 @@ func main() {
 }
 
 func (main Main) run() {
-  var rows = main.readRange(main.config.TRAINING_SHEET ,"A2:G")
+  var rows = main.spreadsheetService.readRange(main.config.TRAINING_SHEET ,"A2:G")
 
   if len(rows.Values) > 0 {
     i := 2
@@ -56,8 +55,8 @@ func (main Main) run() {
           glog.Fatalf("Unable to post message. %v", error)
         }
 
-        main.writeCell(main.config.TRAINING_SHEET, i, main.config.CHANNEL_ID_COLUMN, channelId)
-        main.writeCell(main.config.TRAINING_SHEET, i, main.config.TIMESTAMP_COLUMN, timestamp)
+        main.spreadsheetService.writeCell(main.config.TRAINING_SHEET, i, main.config.CHANNEL_ID_COLUMN, channelId)
+        main.spreadsheetService.writeCell(main.config.TRAINING_SHEET, i, main.config.TIMESTAMP_COLUMN, timestamp)
       }
 
       i++
@@ -66,7 +65,7 @@ func (main Main) run() {
       glog.Info("No data found.")
     }
 
-  rows = main.readRange(main.config.TRAINING_SHEET, "A2:G")
+  rows = main.spreadsheetService.readRange(main.config.TRAINING_SHEET, "A2:G")
 
   if len(rows.Values) > 0 {
     i := 2
@@ -89,7 +88,7 @@ func (main Main) run() {
           message := main.messageBuilder.createTrainingMgmtPost(row, params)
           main.slackService.postMessage(main.config.TRAINING_MGMT_CHANNEL, message.String())
           main.slackService.postMessage("@" + params.Responsible_training_utensils, main.config.TRAINING_UTENSILS_RESPONSIBLE_TEXT)
-          main.writeCell(main.config.TRAINING_SHEET, i, main.config.TRAINING_UTENSILS_COLUMN, "TRUE")
+          main.spreadsheetService.writeCell(main.config.TRAINING_SHEET, i, main.config.TRAINING_UTENSILS_COLUMN, "TRUE")
           }
       i++
       }
@@ -98,7 +97,7 @@ func (main Main) run() {
     }
 
 if false {
-  rows = main.readRange(main.config.GAMES_07_SHEET, "A2:K")
+  rows = main.spreadsheetService.readRange(main.config.GAMES_07_SHEET, "A2:K")
 
     if len(rows.Values) > 0 {
     i := 2
@@ -115,8 +114,8 @@ if false {
           glog.Fatalf("Unable to post massage. %v", error)
         }
 
-        main.writeCell(main.config.GAMES_07_SHEET, i, main.config.GAME_CHANNEL_ID_COLUMN, channelId)
-        main.writeCell(main.config.GAMES_07_SHEET, i, main.config.GAME_TIMESTAMP_COLUMN, timestamp)
+        main.spreadsheetService.writeCell(main.config.GAMES_07_SHEET, i, main.config.GAME_CHANNEL_ID_COLUMN, channelId)
+        main.spreadsheetService.writeCell(main.config.GAMES_07_SHEET, i, main.config.GAME_TIMESTAMP_COLUMN, timestamp)
       }
 
       i++
