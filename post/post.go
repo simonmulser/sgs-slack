@@ -12,13 +12,6 @@ import (
   "google.golang.org/api/sheets/v4"
 )
 
-var arr = [...]string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
-    "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"}
-
-func toAlphabetChar(i int) string {
-    return arr[i]
-}
-
 type TrainingParameters struct{
   Total_going string
   Going_sgs07 string
@@ -64,15 +57,6 @@ type Main struct{
   return params
  }
 
-func (main Main) timeNow() time.Time {
-  t := time.Now()
-  utc, error := time.LoadLocation("Europe/Vienna")
-  if error != nil {
-    glog.Info("error: ", error.Error())
-  }
-  return t.In(utc)
-}
-
 func main() {
   flag.Parse()
   flag.Lookup("logtostderr").Value.Set("true")
@@ -105,7 +89,7 @@ func (main Main) run() {
         glog.Fatalf("Unable to parse date. %v", error)
       }
 
-      if(row[main.config.CHANNEL_ID_COLUMN] == "FALSE" && main.timeNow().After(postingDate)){
+      if(row[main.config.CHANNEL_ID_COLUMN] == "FALSE" && timeNow().After(postingDate)){
         message := main.createTrainingPost(row)
         channelId, timestamp, error := main.postMessage(main.config.TRAINING_CHANNEL, message.String())
         if error != nil {
@@ -133,7 +117,7 @@ func (main Main) run() {
       }
       date = date.Add(-8 * 60 * time.Minute)
 
-      if(row[main.config.CHANNEL_ID_COLUMN] != "FALSE" && row[main.config.BALLS_COLUMN] == "FALSE" && main.timeNow().After(date)){
+      if(row[main.config.CHANNEL_ID_COLUMN] != "FALSE" && row[main.config.BALLS_COLUMN] == "FALSE" && timeNow().After(date)){
           reactions, error := main.slackClient.GetReactions(
             slack.ItemRef{Channel: row[main.config.CHANNEL_ID_COLUMN].(string), Timestamp: row[main.config.TIMESTAMP_COLUMN].(string)},
             slack.GetReactionsParameters{})
@@ -164,7 +148,7 @@ if false {
         glog.Fatalf("Unable to parse date. %v", error)
       }
 
-      if(row[main.config.GAME_CHANNEL_ID_COLUMN] == "FALSE" && main.timeNow().After(postingDate)){
+      if(row[main.config.GAME_CHANNEL_ID_COLUMN] == "FALSE" && timeNow().After(postingDate)){
         message := main.createGamePost(row)
         channelId, timestamp, error := main.postMessage(main.config.TRAINING_CHANNEL, message.String())
         if error != nil {
