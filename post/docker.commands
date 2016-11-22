@@ -1,6 +1,6 @@
 docker-machine env docker-mulser
 eval $(docker-machine env docker-mulser)
 docker build . -t post
-docker create c582d28c3eb4
+docker create post
 docker start 43c3daf0d14cb2694e15a3ba19c4e919af047b063caf84557d302dc6bce78412
 sudo docker exec -i -t loving_heisenberg /bin/bash
