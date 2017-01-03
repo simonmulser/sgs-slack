@@ -10,8 +10,12 @@ type Config struct{
   TRAINING_SHEET string
   GAMES_07_SHEET string
   SLACK_KEY string
+
   TRAINING_CHANNEL string
   TRAINING_MGMT_CHANNEL string
+  GAMES_07_CHANNEL string
+  GAMES_16_CHANNEL string
+
   NAME_COLUMN int
   DESCRIPTION_COLUMN int
   DATE_COLUMN int

@@ -8,12 +8,12 @@
 	"TRAINING_UTENSILS_COLUMN": 6,
 	"TRAINING_UTENSILS_RESPONSIBLE_TEXT": "servus, ciao! du bisch heint für die trainingsutensilien :hammer_and_wrench: zuaständig. sell hoaßt net dass du olles alloane tian muasch, sondern du bisch dafür zuständig dass olles laft. eigentlich hosch lei folgende aufgobe. du muasch die *beim mister informieren wos mor olles fürs training brauchen* und schaugen dass olles zum plotz gebrocht werd *und a wieder zrug*. dobei sich wichtig:\n\n- die *bälle VOR und NOCHN training zu zählen* :soccer:\n- die boracce auffüllen und donoch wieder umgekehrt ins körbele tian :baby_bottle:\n- die casacche nochn training wieder aufhängen :running_shirt_with_sash:\n\nsollat a boll verloren gian, noamol suachen gian :sleuth_or_spy:. wenn man nen sem a net findet donn noamol suachen gian! findet man in boll wirklich nimmer :imp: :imp: :imp:  bitte in marvin :cop: bescheid geben!",
 	"GAME_DATE_COLUMN": 0,
-	"GAME_POSTING_DATE_COLUMN": 1,
-	"HOME_COLUMN": 4,
-	"AWAY_COLUMN": 5,
-	"LOCATION_COLUMN": 6,
-	"LOCATION_MAPS_COLUMN": 7,
-	"SURFACE_COLUMN": 8,
+	"HOME_COLUMN": 3,
+	"AWAY_COLUMN": 4,
+	"LOCATION_COLUMN": 5,
+	"LOCATION_MAPS_COLUMN": 6,
+	"SURFACE_COLUMN": 7,
+	"GAME_POSTING_DATE_COLUMN": 8,
 	"GAME_CHANNEL_ID_COLUMN": 9,
 	"GAME_TIMESTAMP_COLUMN": 10
 }
