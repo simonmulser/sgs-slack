@@ -8,11 +8,12 @@ import (
 )
 
 func processTrainings(main Main) {
-  postTraining(main)
+  postTrainings(main)
   selectResponsibleForUtensils(main)
+  strikeTroughOldTrainings(main)
 }
 
-func postTraining(main Main) {
+func postTrainings(main Main) {
 rows := main.spreadsheetService.readRange(main.config.TRAINING_SHEET ,"A2:G")
 
 if len(rows.Values) > 0 {
@@ -70,6 +71,37 @@ if len(rows.Values) > 0 {
         glog.Info("selected responsible person and updated sheets")
         }
     i++
+    }
+  } else {
+    glog.Info("No data found.")
+  }
+}
+
+func strikeTroughOldTrainings(main Main) {
+  rows := main.spreadsheetService.readRange(main.config.TRAINING_SHEET, "A2:G")
+
+  if len(rows.Values) > 0 {
+    i := 2
+    for _, row := range rows.Values {
+      if(row[main.config.CHANNEL_ID_COLUMN] != "FALSE" && row[main.config.CHANNEL_ID_COLUMN] != "TRUE"){
+        date, error := time.Parse("02.01.2006 15:04", row[main.config.DATE_COLUMN].(string))
+        if error != nil {
+          glog.Fatalf("Unable to parse date. %v", error)
+        }
+
+        date = date.Add(24 * time.Hour)
+        if(timeNow().After(date)) {
+          message := main.messageBuilder.createTrainingPost(row)
+          main.slackService.slack.UpdateMessage(row[main.config.CHANNEL_ID_COLUMN].(string), row[main.config.TIMESTAMP_COLUMN].(string),
+              "~" + message.String() + "~")
+          if error != nil {
+            glog.Fatalf("Unable to post massage. %v", error)
+          }
+          glog.Info("updated game")
+        }
+      }
+
+      i++
     }
   } else {
     glog.Info("No data found.")
