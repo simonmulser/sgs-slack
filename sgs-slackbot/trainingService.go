@@ -32,6 +32,7 @@ if len(rows.Values) > 0 {
 
       main.spreadsheetService.writeCell(main.config.TRAINING_SHEET, i, main.config.CHANNEL_ID_COLUMN, channelId)
       main.spreadsheetService.writeCell(main.config.TRAINING_SHEET, i, main.config.TIMESTAMP_COLUMN, timestamp)
+      glog.Info("posted training and updated sheet")
     }
 
     i++
@@ -66,6 +67,7 @@ if len(rows.Values) > 0 {
         main.slackService.postMessage(main.config.TRAINING_MGMT_CHANNEL, message.String())
         main.slackService.postMessage("@" + params.Responsible_training_utensils, main.config.TRAINING_UTENSILS_RESPONSIBLE_TEXT)
         main.spreadsheetService.writeCell(main.config.TRAINING_SHEET, i, main.config.TRAINING_UTENSILS_COLUMN, "TRUE")
+        glog.Info("selected responsible person and updated sheets")
         }
     i++
     }
