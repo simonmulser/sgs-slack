@@ -5,26 +5,44 @@ import (
   "time"
 )
 
-func processGames(main Main) {
-  rows := main.spreadsheetService.readRange(main.config.GAMES_07_SHEET, "A2:K")
+type GameService struct{
+  main *Main
+  spreadsheetService *SpreadsheetService
+}
+
+func NewGameService(main *Main) *GameService {
+  gameService := new(GameService)
+  gameService.main = main
+
+  return gameService;
+}
+
+func (gameService GameService) process() {
+  gameService.postGames()
+
+  gameService.strikeTroughOldGames()
+}
+
+func (gameService GameService) postGames() {
+  rows := gameService.main.spreadsheetService.readRange(gameService.main.config.GAMES_07_SHEET, "A2:K")
 
   if len(rows.Values) > 0 {
     i := 2
     for _, row := range rows.Values {
-      postingDate, error := time.Parse("02.01.2006 15:04", row[main.config.GAME_POSTING_DATE_COLUMN].(string))
+      postingDate, error := time.Parse("02.01.2006 15:04", row[gameService.main.config.GAME_POSTING_DATE_COLUMN].(string))
       if error != nil {
         glog.Fatalf("Unable to parse date. %v", error)
       }
 
-      if(row[main.config.GAME_CHANNEL_ID_COLUMN] == "FALSE" && timeNow().After(postingDate)){
-        message := main.messageBuilder.createGamePost(row)
-        channelId, timestamp, error := main.slackService.postMessage(main.config.GAMES_07_CHANNEL, message.String())
+      if(row[gameService.main.config.GAME_CHANNEL_ID_COLUMN] == "FALSEx" && timeNow().After(postingDate)){
+        message := gameService.main.messageBuilder.createGamePost(row)
+        channelId, timestamp, error := gameService.main.slackService.postMessage(gameService.main.config.GAMES_07_CHANNEL, message.String())
         if error != nil {
           glog.Fatalf("Unable to post massage. %v", error)
         }
 
-        main.spreadsheetService.writeCell(main.config.GAMES_07_SHEET, i, main.config.GAME_CHANNEL_ID_COLUMN, channelId)
-        main.spreadsheetService.writeCell(main.config.GAMES_07_SHEET, i, main.config.GAME_TIMESTAMP_COLUMN, timestamp)
+        gameService.main.spreadsheetService.writeCell(gameService.main.config.GAMES_07_SHEET, i, gameService.main.config.GAME_CHANNEL_ID_COLUMN, channelId)
+        gameService.main.spreadsheetService.writeCell(gameService.main.config.GAMES_07_SHEET, i, gameService.main.config.GAME_TIMESTAMP_COLUMN, timestamp)
         glog.Info("posted game and updated sheet")
       }
 
@@ -35,22 +53,22 @@ func processGames(main Main) {
   }
 }
 
-func strikeTroughOldGames(main Main) {
-  rows := main.spreadsheetService.readRange(main.config.GAMES_07_SHEET, "A2:K")
+func (gameService GameService) strikeTroughOldGames() {
+  rows := gameService.main.spreadsheetService.readRange(gameService.main.config.GAMES_07_SHEET, "A2:K")
 
   if len(rows.Values) > 0 {
     i := 2
     for _, row := range rows.Values {
-      if(row[main.config.GAME_CHANNEL_ID_COLUMN] != "FALSE" && row[main.config.GAME_CHANNEL_ID_COLUMN] != "TRUE"){
-        date, error := time.Parse("02.01.2006 15:04", row[main.config.GAME_DATE_COLUMN].(string))
+      if(row[gameService.main.config.GAME_CHANNEL_ID_COLUMN] != "FALSE" && row[gameService.main.config.GAME_CHANNEL_ID_COLUMN] != "TRUE"){
+        date, error := time.Parse("02.01.2006 15:04", row[gameService.main.config.GAME_DATE_COLUMN].(string))
         if error != nil {
           glog.Fatalf("Unable to parse date. %v", error)
         }
 
         date = date.Add(24 * time.Hour)
         if(timeNow().After(date)) {
-          message := main.messageBuilder.createGamePost(row)
-          main.slackService.slack.UpdateMessage(row[main.config.GAME_CHANNEL_ID_COLUMN].(string), row[main.config.GAME_TIMESTAMP_COLUMN].(string),
+          message := gameService.main.messageBuilder.createGamePost(row)
+          gameService.main.slackService.slack.UpdateMessage(row[gameService.main.config.GAME_CHANNEL_ID_COLUMN].(string), row[gameService.main.config.GAME_TIMESTAMP_COLUMN].(string),
               "~" + message.String() + "~")
           if error != nil {
             glog.Fatalf("Unable to post massage. %v", error)
