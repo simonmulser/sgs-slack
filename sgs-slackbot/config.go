@@ -41,6 +41,13 @@ func Read(env string) *Config{
     fmt.Println("error:", err)
   }
 
+  file, _ = os.Open("config/connections/slack-key.json")
+  decoder = json.NewDecoder(file)
+  err = decoder.Decode(&config)
+  if err != nil {
+    fmt.Println("error:", err)
+  }
+
   if (env == "development"){
     file, _ = os.Open("config/connections/development-config.json")
   } else if (env == "production"){
