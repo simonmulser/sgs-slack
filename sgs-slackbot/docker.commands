@@ -1,3 +1,5 @@
+docker-machine create --driver=generic --generic-ip-address=... --generic-ssh-user=root --generic-ssh-key=/Users/simon/.ssh/... droplet-docker
+
 docker-machine env docker-mulser
 eval $(docker-machine env docker-mulser)
 docker build . -t post
