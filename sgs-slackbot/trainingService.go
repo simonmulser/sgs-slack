@@ -108,7 +108,7 @@ func (trainingService TrainingService) strikeTroughOldTrainings() {
           if error != nil {
             glog.Fatalf("Unable to post massage. %v", error)
           }
-          glog.Info("updated game")
+          glog.Info("updated training")
         }
       }
 
