@@ -1,5 +1,10 @@
 {
     "TRAINING_SHEET": "1sKvrduUoKRfVk1QMaXwvps0IgAu6xUHhJ6XGSqJW68c",
+    "GAMES_07_SHEET": "1ZnpCJEk5MgrF2n7405RO6R4nERJulClbmuuaKE75Y-M",
+    "GAMES_16_SHEET": "1sSF0z_3hI2v-N3TC51AW_7V_9fJhhscThggbPZjizCU",
+
     "TRAINING_CHANNEL": "training",
-    "TRAINING_MGMT_CHANNEL": "training-mgmt"
+    "TRAINING_MGMT_CHANNEL": "training-mgmt",
+    "GAMES_07_CHANNEL": "spiele-sgs07",
+    "GAMES_16_CHANNEL": "spiele-sgs16"
 }

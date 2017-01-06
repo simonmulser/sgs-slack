@@ -9,6 +9,7 @@ import (
 type Config struct{
   TRAINING_SHEET string
   GAMES_07_SHEET string
+  GAMES_16_SHEET string
   SLACK_KEY string
 
   TRAINING_CHANNEL string
