@@ -100,7 +100,7 @@ func (trainingService TrainingService) strikeTroughOldTrainings() {
           glog.Fatalf("Unable to parse date. %v", error)
         }
 
-        date = date.Add(24 * time.Hour)
+        date = date.Add(12 * time.Hour)
         if(timeNow().After(date)) {
           message := trainingService.main.messageBuilder.createTrainingPost(row)
           trainingService.main.slackService.slack.UpdateMessage(row[trainingService.main.config.CHANNEL_ID_COLUMN].(string), row[trainingService.main.config.TIMESTAMP_COLUMN].(string),

@@ -78,7 +78,7 @@ func (gameService GameService) strikeTroughOldGames() {
             glog.Fatalf("Unable to parse date. %v", error)
           }
 
-          date = date.Add(24 * time.Hour)
+          date = date.Add(12 * time.Hour)
           if(timeNow().After(date)) {
             message := gameService.main.messageBuilder.createGamePost(row)
             gameService.main.slackService.slack.UpdateMessage(row[gameService.main.config.GAME_CHANNEL_ID_COLUMN].(string), row[gameService.main.config.GAME_TIMESTAMP_COLUMN].(string),
