@@ -17,9 +17,13 @@ RUN go get google.golang.org/api/sheets/v4
 RUN go get github.com/golang/glog
 RUN go install github.com/simonmulser/sgs-slackbot
 
-# cron stuff
 RUN apt-get update && apt-get install -y \
   cron
+
+RUN mkdir /root/.credentials
+COPY token.json /root/.credentials
+
+# cron stuff
 ADD crontab /etc/cron.d/cron-task
 RUN chmod 0644 /etc/cron.d/cron-task
 RUN touch /var/log/cron.log
