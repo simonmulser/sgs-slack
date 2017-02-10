@@ -62,7 +62,7 @@ func tokenCacheFile() (string, error) {
   tokenCacheDir := filepath.Join(usr.HomeDir, ".credentials")
   os.MkdirAll(tokenCacheDir, 0700)
   return filepath.Join(tokenCacheDir,
-    url.QueryEscape("sheets.googleapis.com-go-quickstart.json")), err
+    url.QueryEscape("token.json")), err
 }
 
 // tokenFromFile retrieves a Token from a given file path.
