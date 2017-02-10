@@ -3,9 +3,6 @@ FROM golang:1.6
 # Create the directory where the application will reside
 RUN mkdir /app
 
-# Copy the application files (needed for production)
-ADD . /go/src/github.com/simonmulser/sgs-slackbot
-
 # Build the sgs-slackbot command inside the container.
 # (You may fetch or manage dependencies here,
 # either manually or with a tool like "godep".)
@@ -15,10 +12,13 @@ RUN go get golang.org/x/oauth2
 RUN go get golang.org/x/oauth2/google
 RUN go get google.golang.org/api/sheets/v4
 RUN go get github.com/golang/glog
-RUN go install github.com/simonmulser/sgs-slackbot
 
 RUN apt-get update && apt-get install -y \
   cron
+
+# Copy the application files (needed for production)
+ADD . /go/src/github.com/simonmulser/sgs-slackbot
+RUN go install github.com/simonmulser/sgs-slackbot
 
 RUN mkdir /root/.credentials
 COPY token.json /root/.credentials
