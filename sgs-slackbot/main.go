@@ -1,45 +1,47 @@
 package main
 
 import (
-  "github.com/golang/glog"
-  "os"
-  "flag"
+	"flag"
+	"os"
+
+	"github.com/golang/glog"
 )
 
-type Main struct{
-  config *Config
-  slackService *SlackService
-  spreadsheetService *SpreadsheetService
-  messageBuilder *MessageBuilder
-  gameService *GameService
-  trainingService *TrainingService
+// Main holds all services
+type Main struct {
+	config             *Config
+	slackService       *SlackService
+	spreadsheetService *SpreadsheetService
+	messageBuilder     *MessageBuilder
+	gameService        *GameService
+	trainingService    *TrainingService
 }
 
 func main() {
-  flag.Parse()
-  flag.Lookup("logtostderr").Value.Set("true")
-  glog.Info("Program started")
+	flag.Parse()
+	flag.Lookup("logtostderr").Value.Set("true")
+	glog.Info("Program started")
 
-  env := "development"
-  if (len(os.Args) > 1) {
-    env = os.Args[1]
-  }
+	env := "development"
+	if len(os.Args) > 1 {
+		env = os.Args[1]
+	}
 
-  instance := Main{}
-  instance.config = Read(env)
-  instance.slackService = NewSlackService(instance.config.SLACK_KEY)
-  instance.messageBuilder = NewMessageBuilder(instance.config, instance.slackService)
-  instance.spreadsheetService = NewSpreadsheetService()
-  instance.trainingService = NewTrainingService(&instance)
-  instance.gameService = NewGameService(&instance)
+	instance := Main{}
+	instance.config = read(env)
+	instance.slackService = newSlackService(instance.config.SlackKey)
+	instance.messageBuilder = newMessageBuilder(instance.config, instance.slackService)
+	instance.spreadsheetService = newSpreadsheetService()
+	instance.trainingService = newTrainingService(&instance)
+	instance.gameService = newGameService(&instance)
 
-  instance.run()
+	instance.run()
 
-  glog.Info("Program terminated")
+	glog.Info("Program terminated")
 }
 
 func (main Main) run() {
-  main.trainingService.process()
+	main.trainingService.process()
 
-  main.gameService.process()
+	main.gameService.process()
 }

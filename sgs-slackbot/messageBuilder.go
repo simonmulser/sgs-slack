@@ -1,125 +1,126 @@
 package main
 
 import (
-  "bytes"
-  "strconv"
-  "time"
-  "math/rand"
+	"bytes"
+	"math/rand"
+	"strconv"
+	"time"
 
-  "github.com/golang/glog"
-  "github.com/nlopes/slack"
+	"github.com/golang/glog"
+	"github.com/nlopes/slack"
 )
 
-type MessageBuilder struct{
-  config *Config
-  slackService *SlackService
+// MessageBuilder helps you to build messages
+type MessageBuilder struct {
+	config       *Config
+	slackService *SlackService
 }
 
-func NewMessageBuilder(config *Config, slackService *SlackService) *MessageBuilder{
-  messageBuilder := new(MessageBuilder)
-  messageBuilder.slackService = slackService
-  messageBuilder.config = config
+func newMessageBuilder(config *Config, slackService *SlackService) *MessageBuilder {
+	messageBuilder := new(MessageBuilder)
+	messageBuilder.slackService = slackService
+	messageBuilder.config = config
 
-  return messageBuilder
+	return messageBuilder
 }
 
-type TrainingParameters struct{
-  Total_going string
-  Going_sgs07 string
-  Going_sgs16 string
-  Responsible_training_utensils string
+type trainingParameters struct {
+	TotalGoing                  string
+	GoingSGS07                  string
+	GoingSGS16                  string
+	ResponsibleTrainingUtensils string
 }
 
 func (messageBuilder MessageBuilder) createTrainingPost(row []interface{}) bytes.Buffer {
-  var buffer bytes.Buffer
-  buffer.WriteString(row[messageBuilder.config.NAME_COLUMN].(string))
-  buffer.WriteString(" am *")
-  buffer.WriteString(row[messageBuilder.config.DATE_COLUMN].(string))
-  buffer.WriteString("* Uhr! ")
-  buffer.WriteString(row[messageBuilder.config.DESCRIPTION_COLUMN].(string))
-  return buffer
- }
+	var buffer bytes.Buffer
+	buffer.WriteString(row[messageBuilder.config.NameColumn].(string))
+	buffer.WriteString(" am *")
+	buffer.WriteString(row[messageBuilder.config.DateColumn].(string))
+	buffer.WriteString("* Uhr! ")
+	buffer.WriteString(row[messageBuilder.config.DescriptionColumn].(string))
+	return buffer
+}
 
 func (messageBuilder MessageBuilder) createGamePost(row []interface{}) bytes.Buffer {
-  var buffer bytes.Buffer
+	var buffer bytes.Buffer
 
-  meetingTime, error := time.Parse("02.01.2006 15:04", row[messageBuilder.config.GAME_DATE_COLUMN].(string)) 
-  if error != nil {
-    glog.Fatalf("Unable to parse date. %v", error)
-  }
-  meetingTime = meetingTime.Add(-1 * 60 * time.Minute)
+	meetingTime, error := time.Parse("02.01.2006 15:04", row[messageBuilder.config.GameDateColumn].(string))
+	if error != nil {
+		glog.Fatalf("Unable to parse date. %v", error)
+	}
+	meetingTime = meetingTime.Add(-1 * 60 * time.Minute)
 
-  buffer.WriteString("*")
-  buffer.WriteString(row[messageBuilder.config.HOME_COLUMN].(string))
-  buffer.WriteString(" : ")
-  buffer.WriteString(row[messageBuilder.config.AWAY_COLUMN].(string))
-  buffer.WriteString("* am *")
-  buffer.WriteString(row[messageBuilder.config.GAME_DATE_COLUMN].(string))
-  buffer.WriteString("* Uhr auf ")
-  buffer.WriteString(row[messageBuilder.config.SURFACE_COLUMN].(string))
-  buffer.WriteString("! Treffpunkt: ")
-  buffer.WriteString(meetingTime.Format("15:04"))
-  buffer.WriteString(", ")
-  buffer.WriteString(row[messageBuilder.config.LOCATION_COLUMN].(string))
-  buffer.WriteString(" - ")
-  buffer.WriteString(row[messageBuilder.config.LOCATION_MAPS_COLUMN].(string))
-  buffer.WriteString(".")
+	buffer.WriteString("*")
+	buffer.WriteString(row[messageBuilder.config.HomeColumn].(string))
+	buffer.WriteString(" : ")
+	buffer.WriteString(row[messageBuilder.config.AwayColumn].(string))
+	buffer.WriteString("* am *")
+	buffer.WriteString(row[messageBuilder.config.GameDateColumn].(string))
+	buffer.WriteString("* Uhr auf ")
+	buffer.WriteString(row[messageBuilder.config.SurfaceColumn].(string))
+	buffer.WriteString("! Treffpunkt: ")
+	buffer.WriteString(meetingTime.Format("15:04"))
+	buffer.WriteString(", ")
+	buffer.WriteString(row[messageBuilder.config.LocationColumn].(string))
+	buffer.WriteString(" - ")
+	buffer.WriteString(row[messageBuilder.config.LocationMapsColumn].(string))
+	buffer.WriteString(".")
 
-  return buffer
- }
+	return buffer
+}
 
-func (messageBuilder MessageBuilder) createTrainingMgmtPost(row []interface{}, params TrainingParameters ) bytes.Buffer {
-  var buffer bytes.Buffer
-  buffer.WriteString("Ban Training heint (")
-  buffer.WriteString(row[messageBuilder.config.NAME_COLUMN].(string))
-  buffer.WriteString(" - ")
-  buffer.WriteString(row[messageBuilder.config.DATE_COLUMN].(string))
-  buffer.WriteString(")")
-  buffer.WriteString(" sein insgesomt *")
-  buffer.WriteString(params.Total_going)
-  buffer.WriteString("*, *");
-  buffer.WriteString(params.Going_sgs07)
-  buffer.WriteString(" SGS07* und *");
-  buffer.WriteString(params.Going_sgs16)
-  buffer.WriteString(" SGS16*.\n");
+func (messageBuilder MessageBuilder) createTrainingMgmtPost(row []interface{}, params trainingParameters) bytes.Buffer {
+	var buffer bytes.Buffer
+	buffer.WriteString("Ban Training heint (")
+	buffer.WriteString(row[messageBuilder.config.NameColumn].(string))
+	buffer.WriteString(" - ")
+	buffer.WriteString(row[messageBuilder.config.DateColumn].(string))
+	buffer.WriteString(")")
+	buffer.WriteString(" sein insgesomt *")
+	buffer.WriteString(params.TotalGoing)
+	buffer.WriteString("*, *")
+	buffer.WriteString(params.GoingSGS07)
+	buffer.WriteString(" SGS07* und *")
+	buffer.WriteString(params.GoingSGS16)
+	buffer.WriteString(" SGS16*.\n")
 
-  if(params.Responsible_training_utensils != "") {
-    buffer.WriteString("Für Trainingsutensilien zuständig: *");
-    buffer.WriteString(params.Responsible_training_utensils)
-    buffer.WriteString("!*");
-  }
+	if params.ResponsibleTrainingUtensils != "" {
+		buffer.WriteString("Für Trainingsutensilien zuständig: *")
+		buffer.WriteString(params.ResponsibleTrainingUtensils)
+		buffer.WriteString("!*")
+	}
 
-  return buffer
- }
+	return buffer
+}
 
-func (messageBuilder MessageBuilder) createTrainingParams(reactions []slack.ItemReaction) TrainingParameters {
-  var params TrainingParameters
-  var going []string
-  count_muscle := 0
-  count_facepunch := 0
+func (messageBuilder MessageBuilder) createTrainingParams(reactions []slack.ItemReaction) trainingParameters {
+	var params trainingParameters
+	var going []string
+	countMuscle := 0
+	countFacepunch := 0
 
-  for _,reaction := range reactions {
-    if(reaction.Name == "muscle"){
-      count_muscle= reaction.Count
-      going = append(going, reaction.Users...)
-      }
-    if(reaction.Name == "facepunch"){
-      count_facepunch = reaction.Count
-      going = append(going, reaction.Users...)
-      }
-    }
+	for _, reaction := range reactions {
+		if reaction.Name == "muscle" {
+			countMuscle = reaction.Count
+			going = append(going, reaction.Users...)
+		}
+		if reaction.Name == "facepunch" {
+			countFacepunch = reaction.Count
+			going = append(going, reaction.Users...)
+		}
+	}
 
-  params.Going_sgs07 = strconv.Itoa(count_muscle)
-  params.Going_sgs16 = strconv.Itoa(count_facepunch)
-  params.Total_going = strconv.Itoa(count_muscle + count_facepunch)
+	params.GoingSGS07 = strconv.Itoa(countMuscle)
+	params.GoingSGS16 = strconv.Itoa(countFacepunch)
+	params.TotalGoing = strconv.Itoa(countMuscle + countFacepunch)
 
-  if(len(going) > 0){
-    user, error := messageBuilder.slackService.slack.GetUserInfo(going[rand.Intn(len(going))])
-    if error != nil {
-      glog.Fatalf("error: ", error.Error())
-    }
-    params.Responsible_training_utensils = user.Name
-  }
+	if len(going) > 0 {
+		user, error := messageBuilder.slackService.slack.GetUserInfo(going[rand.Intn(len(going))])
+		if error != nil {
+			glog.Fatalf("error: %v", error)
+		}
+		params.ResponsibleTrainingUtensils = user.Name
+	}
 
-  return params
- }
+	return params
+}

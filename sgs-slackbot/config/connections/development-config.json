@@ -1,10 +1,10 @@
 {
-    "TRAINING_SHEET": "1JE2qNrseoyQqzi6-wSLpJlss485hpcfUpye1sos7Z6o",
-    "GAMES_07_SHEET": "1ZnpCJEk5MgrF2n7405RO6R4nERJulClbmuuaKE75Y-M",
-    "GAMES_16_SHEET": "1B9VSUmYNJjcaqa9lGmXJOu4uOu1UFUT9-RPFcUTqTKY",
+    "TrainingSheet": "1JE2qNrseoyQqzi6-wSLpJlss485hpcfUpye1sos7Z6o",
+    "Games07Sheet": "1ZnpCJEk5MgrF2n7405RO6R4nERJulClbmuuaKE75Y-M",
+    "Games16Sheet": "1B9VSUmYNJjcaqa9lGmXJOu4uOu1UFUT9-RPFcUTqTKY",
 
-    "TRAINING_CHANNEL": "dev-training",
-    "TRAINING_MGMT_CHANNEL": "dev-training-mgmt",
-    "GAMES_07_CHANNEL": "dev-spiele-sgs07",
-    "GAMES_16_CHANNEL": "dev-spiele-sgs16"
+    "TrainingChannel": "dev-Training",
+    "TrainingMgmtChannel": "dev-Training-mgmt",
+    "Games07Channel": "dev-spiele-sgs07",
+    "Games16Channel": "dev-spiele-sgs16"
 }

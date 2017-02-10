@@ -1,70 +1,71 @@
 package main
 
 import (
-	"os"
 	"encoding/json"
 	"fmt"
+	"os"
 )
 
-type Config struct{
-  TRAINING_SHEET string
-  GAMES_07_SHEET string
-  GAMES_16_SHEET string
-  SLACK_KEY string
+// Config contains all config data
+type Config struct {
+	TrainingSheet string
+	Games07Sheet  string
+	Games16Sheet  string
+	SlackKey      string
 
-  TRAINING_CHANNEL string
-  TRAINING_MGMT_CHANNEL string
-  GAMES_07_CHANNEL string
-  GAMES_16_CHANNEL string
+	TrainingChannel     string
+	TrainingMgmtChannel string
+	Games07Channel      string
+	Games16Channel      string
 
-  NAME_COLUMN int
-  DESCRIPTION_COLUMN int
-  DATE_COLUMN int
-  POSTING_DATE_COLUMN int
-  CHANNEL_ID_COLUMN int
-  TIMESTAMP_COLUMN int
-  TRAINING_UTENSILS_COLUMN int
-  TRAINING_UTENSILS_RESPONSIBLE_TEXT string
+	NameColumn                      int
+	DescriptionColumn               int
+	DateColumn                      int
+	PostingDateColumn               int
+	ChannelIDColumn                 int
+	TimestampColumn                 int
+	TrainingUtensilsColumn          int
+	TrainingUtensilsResponsibleText string
 
-  GAME_DATE_COLUMN int
-  GAME_POSTING_DATE_COLUMN int
-  HOME_COLUMN int
-  AWAY_COLUMN int
-  LOCATION_COLUMN int
-  LOCATION_MAPS_COLUMN int
-  SURFACE_COLUMN int
-  GAME_CHANNEL_ID_COLUMN int
-  GAME_TIMESTAMP_COLUMN int
+	GameDateColumn        int
+	GamePostingDateColumn int
+	HomeColumn            int
+	AwayColumn            int
+	LocationColumn        int
+	LocationMapsColumn    int
+	SurfaceColumn         int
+	GameChannelIDColumn   int
+	GameTimestampColumn   int
 }
 
-func Read(env string) *Config{
+func read(env string) *Config {
 	file, _ := os.Open("config/config.json")
 	decoder := json.NewDecoder(file)
-  config := Config{}
-  err := decoder.Decode(&config)
-  if err != nil {
-    fmt.Println("error:", err)
-  }
+	config := Config{}
+	err := decoder.Decode(&config)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
 
-  file, _ = os.Open("config/connections/slack-key.json")
-  decoder = json.NewDecoder(file)
-  err = decoder.Decode(&config)
-  if err != nil {
-    fmt.Println("error:", err)
-  }
+	file, _ = os.Open("config/connections/slack-key.json")
+	decoder = json.NewDecoder(file)
+	err = decoder.Decode(&config)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
 
-  if (env == "development"){
-    file, _ = os.Open("config/connections/development-config.json")
-  } else if (env == "production"){
-    file, _ = os.Open("config/connections/production-config.json")
-  } else {
-    fmt.Println("error: unkown env")
-  }
-  decoder = json.NewDecoder(file)
-  err = decoder.Decode(&config)
-  if err != nil {
-    fmt.Println("error:", err)
-  }
+	if env == "development" {
+		file, _ = os.Open("config/connections/development-config.json")
+	} else if env == "production" {
+		file, _ = os.Open("config/connections/production-config.json")
+	} else {
+		fmt.Println("error: unkown env")
+	}
+	decoder = json.NewDecoder(file)
+	err = decoder.Decode(&config)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
 
-  return &config
+	return &config
 }

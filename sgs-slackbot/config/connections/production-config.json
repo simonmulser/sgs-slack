@@ -1,10 +1,10 @@
 {
-    "TRAINING_SHEET": "1sKvrduUoKRfVk1QMaXwvps0IgAu6xUHhJ6XGSqJW68c",
-    "GAMES_07_SHEET": "10vUldtv9monEGrlvlnuRcuLC7NEnDO5yQDy_cb2chyk",
-    "GAMES_16_SHEET": "12VRFXUiAcs6pObEPEjj5ykId0ahWM6GSy-2fnWsZxb0",
+    "TrainingSheet": "1sKvrduUoKRfVk1QMaXwvps0IgAu6xUHhJ6XGSqJW68c",
+    "Games07Sheet": "10vUldtv9monEGrlvlnuRcuLC7NEnDO5yQDy_cb2chyk",
+    "Games16Sheet": "12VRFXUiAcs6pObEPEjj5ykId0ahWM6GSy-2fnWsZxb0",
 
-    "TRAINING_CHANNEL": "training",
-    "TRAINING_MGMT_CHANNEL": "training-mgmt",
-    "GAMES_07_CHANNEL": "spiele-sgs07",
-    "GAMES_16_CHANNEL": "spiele-sgs16"
+    "TrainingChannel": "Training",
+    "TrainingMgmtChannel": "Training-mgmt",
+    "Games07Channel": "spiele-sgs07",
+    "Games16Channel": "spiele-sgs16"
 }
