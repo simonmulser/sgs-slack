@@ -68,6 +68,7 @@ func TestToProcess(t *testing.T) {
 	row := createRow([]string{"PLANEND", "05.06.1991 20:04", "FALSE"})
 	mockMessageBuilder.On("createGamePost", row).Return(createBuffer())
 	mockSlackService.On("postMessage", "teamChannel", "createGamePost").Return("channelID", "timestamp", nil)
+	mockSpreadsheetService.On("writeCell", "teamSheet", 0, main.config.GameStatusColumn, "POSTED").Return()
 	mockSpreadsheetService.On("writeCell", "teamSheet", 0, main.config.GameChannelIDColumn, "channelID").Return()
 	mockSpreadsheetService.On("writeCell", "teamSheet", 0, main.config.GameTimestampColumn, "timestamp").Return()
 

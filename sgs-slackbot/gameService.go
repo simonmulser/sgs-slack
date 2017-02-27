@@ -91,6 +91,7 @@ func (gameService GameService) toProcess(row []interface{}, team teamConfig, row
 			return error
 		}
 
+		gameService.ISpreadsheetService.writeCell(team.sheet, rowNumber, gameService.config.GameStatusColumn, "POSTED")
 		gameService.ISpreadsheetService.writeCell(team.sheet, rowNumber, gameService.config.GameChannelIDColumn, channelID)
 		gameService.ISpreadsheetService.writeCell(team.sheet, rowNumber, gameService.config.GameTimestampColumn, timestamp)
 		glog.Info("posted Game and updated sheet")
