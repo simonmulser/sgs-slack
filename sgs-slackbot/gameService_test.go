@@ -21,7 +21,7 @@ func TestProcessNew(t *testing.T) {
 
 	gameService := newGameService(&main)
 
-	row := createRow([]string{"NEW", "05.06.1991 20:04", "FALSE"})
+	row := createRow([]string{"NEW", "05.06.1991 20:04"})
 	mockMessageBuilder.On("createGamePost", row).Return(createBuffer())
 	mockSlackService.On("postMessage", "teamChannel", "createGamePost").Return("channelID", "timestamp", nil)
 	mockSpreadsheetService.On("writeCell", "teamSheet", 0, main.config.StatusColumn, "POSTED").Return()
@@ -40,7 +40,7 @@ func TestProcessNewWrongDate(t *testing.T) {
 
 	gameService := newGameService(&main)
 
-	row := createRow([]string{"NEW", "05.06.1991", "FALSE"})
+	row := createRow([]string{"NEW", "05.06.1991"})
 
 	error := gameService.processNew(row, createTeamConfig(), 0)
 	assert.NotNil(t, error)
@@ -58,7 +58,7 @@ func TestProcessNewErrorPosting(t *testing.T) {
 
 	gameService := newGameService(&main)
 
-	row := createRow([]string{"NEW", "05.06.1991 20:04", "FALSE"})
+	row := createRow([]string{"NEW", "05.06.1991 20:04"})
 	mockMessageBuilder.On("createGamePost", row).Return(createBuffer())
 	mockSlackService.On("postMessage", "teamChannel", "createGamePost").Return("test1", "test2", errors.New("errorFromMock"))
 

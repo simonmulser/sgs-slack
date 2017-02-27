@@ -72,7 +72,7 @@ func (gameService GameService) processNew(row []interface{}, team teamConfig, ro
 		return error
 	}
 
-	if row[gameService.config.GameChannelIDColumn] == "FALSE" && timeNow().After(postingDate) {
+	if timeNow().After(postingDate) {
 		message := gameService.IMessageBuilder.createGamePost(row)
 		channelID, timestamp, error := gameService.ISlackService.postMessage(team.channel, message.String())
 		if error != nil {
