@@ -55,8 +55,8 @@ func (gameService GameService) postGames() {
 			for _, row := range rows.Values {
 				var error error
 				switch row[gameService.config.GameStatusColumn] {
-				case "PLANNED":
-					error = gameService.toProcess(row, team, i)
+				case "NEW":
+					error = gameService.processNew(row, team, i)
 				case "POSTED":
 				case "UPDATE":
 				case "OVER":
@@ -76,7 +76,7 @@ func (gameService GameService) postGames() {
 	}
 }
 
-func (gameService GameService) toProcess(row []interface{}, team teamConfig, rowNumber int) error {
+func (gameService GameService) processNew(row []interface{}, team teamConfig, rowNumber int) error {
 	postingDate, error := time.Parse("02.01.2006 15:04", row[gameService.config.GamePostingDateColumn].(string))
 	if error != nil {
 		glog.Warningf("Unable to parse date. %v", error)

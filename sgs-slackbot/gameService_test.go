@@ -52,7 +52,7 @@ func (messageBuilder MockMessageBuilder) createTrainingParams(reactions []slack.
 	return params
 }
 
-func TestToProcess(t *testing.T) {
+func TestProcessNew(t *testing.T) {
 	main := Main{}
 	main.config = createConfig()
 
@@ -65,33 +65,33 @@ func TestToProcess(t *testing.T) {
 
 	gameService := newGameService(&main)
 
-	row := createRow([]string{"PLANEND", "05.06.1991 20:04", "FALSE"})
+	row := createRow([]string{"NEW", "05.06.1991 20:04", "FALSE"})
 	mockMessageBuilder.On("createGamePost", row).Return(createBuffer())
 	mockSlackService.On("postMessage", "teamChannel", "createGamePost").Return("channelID", "timestamp", nil)
 	mockSpreadsheetService.On("writeCell", "teamSheet", 0, main.config.GameStatusColumn, "POSTED").Return()
 	mockSpreadsheetService.On("writeCell", "teamSheet", 0, main.config.GameChannelIDColumn, "channelID").Return()
 	mockSpreadsheetService.On("writeCell", "teamSheet", 0, main.config.GameTimestampColumn, "timestamp").Return()
 
-	error := gameService.toProcess(row, createTeamConfig(), 0)
+	error := gameService.processNew(row, createTeamConfig(), 0)
 
 	assert.Nil(t, error)
 	mockMessageBuilder.AssertExpectations(t)
 }
 
-func TestToProcessWrongDate(t *testing.T) {
+func TestProcessNewWrongDate(t *testing.T) {
 	main := Main{}
 	main.config = createConfig()
 
 	gameService := newGameService(&main)
 
-	row := createRow([]string{"PLANEND", "05.06.1991", "FALSE"})
+	row := createRow([]string{"NEW", "05.06.1991", "FALSE"})
 
-	error := gameService.toProcess(row, createTeamConfig(), 0)
+	error := gameService.processNew(row, createTeamConfig(), 0)
 	assert.NotNil(t, error)
 	assert.Contains(t, error.Error(), "cannot parse")
 }
 
-func TestToProcessErrorPosting(t *testing.T) {
+func TestProcessNewErrorPosting(t *testing.T) {
 	main := Main{}
 	main.config = createConfig()
 
@@ -102,11 +102,11 @@ func TestToProcessErrorPosting(t *testing.T) {
 
 	gameService := newGameService(&main)
 
-	row := createRow([]string{"PLANEND", "05.06.1991 20:04", "FALSE"})
+	row := createRow([]string{"NEW", "05.06.1991 20:04", "FALSE"})
 	mockMessageBuilder.On("createGamePost", row).Return(createBuffer())
 	mockSlackService.On("postMessage", "teamChannel", "createGamePost").Return("test1", "test2", errors.New("errorFromMock"))
 
-	error := gameService.toProcess(row, createTeamConfig(), 0)
+	error := gameService.processNew(row, createTeamConfig(), 0)
 
 	assert.NotNil(t, error)
 	assert.Contains(t, error.Error(), "errorFromMock")
