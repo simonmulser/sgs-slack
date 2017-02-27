@@ -8,11 +8,8 @@ import (
 
 // GameService to process games
 type GameService struct {
-	spreadsheetService *SpreadsheetService
-	config             *Config
-	messageBuilder     *MessageBuilder
-	slackService       *SlackService
-	teams              []teamConfig
+	config *Config
+	teams  []teamConfig
 	IMessageBuilder
 	ISlackService
 	ISpreadsheetService
@@ -25,10 +22,7 @@ type teamConfig struct {
 
 func newGameService(main *Main) *GameService {
 	gameService := new(GameService)
-	gameService.spreadsheetService = main.spreadsheetService
 	gameService.config = main.config
-	gameService.messageBuilder = main.messageBuilder
-	gameService.slackService = main.slackService
 	gameService.IMessageBuilder = main.IMessageBuilder
 	gameService.ISlackService = main.ISlackService
 	gameService.ISpreadsheetService = main.ISpreadsheetService
@@ -42,7 +36,7 @@ func newGameService(main *Main) *GameService {
 
 func (gameService GameService) process() {
 	for _, team := range gameService.teams {
-		rows := gameService.spreadsheetService.readRange(team.sheet, "A2:K")
+		rows := gameService.ISpreadsheetService.readRange(team.sheet, "A2:K")
 
 		if len(rows.Values) > 0 {
 			i := 2

@@ -3,6 +3,8 @@ package main
 import (
 	"bytes"
 
+	sheets "google.golang.org/api/sheets/v4"
+
 	"github.com/nlopes/slack"
 	"github.com/stretchr/testify/mock"
 )
@@ -14,6 +16,12 @@ type MockSpreadsheetService struct {
 func (mockSpreadsheetService MockSpreadsheetService) writeCell(sheet string, row int, column int, text string) {
 	mockSpreadsheetService.Called(sheet, row, column, text)
 	return
+}
+
+func (mockSpreadsheetService MockSpreadsheetService) readRange(sheet string, rangeToRead string) *sheets.ValueRange {
+	args := mockSpreadsheetService.Called(sheet, rangeToRead)
+	valueRange := args.Get(0).(sheets.ValueRange)
+	return &valueRange
 }
 
 type MockSlackService struct {

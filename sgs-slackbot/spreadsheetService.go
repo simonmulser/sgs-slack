@@ -9,6 +9,7 @@ import (
 
 type ISpreadsheetService interface {
 	writeCell(sheet string, row int, column int, text string)
+	readRange(sheet string, rangeToRead string) *sheets.ValueRange
 }
 
 // SpreadsheetService helps you to interact with a sheet
