@@ -53,7 +53,16 @@ func (gameService GameService) postGames() {
 		if len(rows.Values) > 0 {
 			i := 2
 			for _, row := range rows.Values {
-				error := gameService.toProcess(row, team, i)
+				var error error
+				switch row[gameService.config.GameStatusColumn] {
+				case "PLANNED":
+					error = gameService.toProcess(row, team, i)
+				case "POSTED":
+				case "UPDATE":
+				case "OVER":
+				default:
+					glog.Warningf("Status not recognized")
+				}
 
 				if error != nil {
 					glog.Warningf("Could not process row %v", error)

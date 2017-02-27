@@ -34,6 +34,7 @@ type Config struct {
 	LocationColumn        int
 	LocationMapsColumn    int
 	SurfaceColumn         int
+	GameStatusColumn      int
 	GameChannelIDColumn   int
 	GameTimestampColumn   int
 }

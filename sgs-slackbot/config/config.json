@@ -14,6 +14,7 @@
 	"LocationMapsColumn": 6,
 	"SurfaceColumn": 7,
 	"GamePostingDateColumn": 8,
-	"GameChannelIDColumn": 9,
-	"GameTimestampColumn": 10
+	"GameStatusColumn": 10,
+	"GameChannelIDColumn": 10,
+	"GameTimestampColumn": 11
 }
