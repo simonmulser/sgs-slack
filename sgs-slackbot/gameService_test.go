@@ -164,12 +164,11 @@ func TestProcessPostedWithErrorWhileUpdating(t *testing.T) {
 	mockSlackService := new(MockSlackService)
 	main.ISlackService = mockSlackService
 
-	mockSlackService.On("updateMessage", "teamChannel", "Timestamp", "~createGamePost~").Return("nil", "nil", "nil", errors.New("errorFromMock"))
-
 	gameService := newGameService(&main)
 
 	row := createRow([]string{"POSTED", "05.05.1991 20:20", "teamChannel", "Timestamp"})
 	mockMessageBuilder.On("createGamePost", row).Return(createBuffer())
+	mockSlackService.On("updateMessage", "teamChannel", "Timestamp", "~createGamePost~").Return("nil", "nil", "nil", errors.New("errorFromMock"))
 
 	error := gameService.processPosted(row, createTeamConfig(), 0)
 	assert.NotNil(t, error)
