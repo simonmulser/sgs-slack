@@ -32,9 +32,9 @@ func main() {
 
 	instance := Main{}
 	instance.config = read(env)
-	instance.slackService = newSlackService(instance.config.SlackKey)
-	instance.messageBuilder = newMessageBuilder(instance.config, instance.slackService)
-	instance.spreadsheetService = newSpreadsheetService()
+	instance.ISlackService = newSlackService(instance.config.SlackKey)
+	instance.IMessageBuilder = newMessageBuilder(instance.config, instance.slackService)
+	instance.ISpreadsheetService = newSpreadsheetService()
 	instance.trainingService = newTrainingService(&instance)
 	instance.gameService = newGameService(&instance)
 
