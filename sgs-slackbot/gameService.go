@@ -54,6 +54,7 @@ func (gameService GameService) process() {
 				case "POSTED":
 					error = gameService.processPosted(row, team, i)
 				case "UPDATE":
+					error = gameService.processUpdate(row, team, i)
 				case "OVER":
 				default:
 					glog.Warningf("Status not recognized")
@@ -115,5 +116,19 @@ func (gameService GameService) processPosted(row []interface{}, team teamConfig,
 		gameService.ISpreadsheetService.writeCell(team.sheet, rowNumber, gameService.config.GameStatusColumn, "OVER")
 		glog.Info("updated Game")
 	}
+	return nil
+}
+
+func (gameService GameService) processUpdate(row []interface{}, team teamConfig, rowNumber int) error {
+	message := gameService.IMessageBuilder.createGamePost(row)
+	_, _, _, error := gameService.ISlackService.updateMessage(row[gameService.config.GameChannelIDColumn].(string), row[gameService.config.GameTimestampColumn].(string), message.String())
+
+	if error != nil {
+		glog.Warningf("Unable to post massage. %v", error)
+		return error
+	}
+
+	gameService.ISpreadsheetService.writeCell(team.sheet, rowNumber, gameService.config.GameStatusColumn, "POSTED")
+	glog.Info("updated Game")
 	return nil
 }
