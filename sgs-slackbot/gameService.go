@@ -41,12 +41,6 @@ func newGameService(main *Main) *GameService {
 }
 
 func (gameService GameService) process() {
-	gameService.postGames()
-
-	gameService.strikeTroughOldGames()
-}
-
-func (gameService GameService) postGames() {
 	for _, team := range gameService.teams {
 		rows := gameService.spreadsheetService.readRange(team.sheet, "A2:K")
 
@@ -58,6 +52,7 @@ func (gameService GameService) postGames() {
 				case "NEW":
 					error = gameService.processNew(row, team, i)
 				case "POSTED":
+					error = gameService.processPosted(row, team, i)
 				case "UPDATE":
 				case "OVER":
 				default:
@@ -99,35 +94,26 @@ func (gameService GameService) processNew(row []interface{}, team teamConfig, ro
 	return nil
 }
 
-func (gameService GameService) strikeTroughOldGames() {
-	for _, team := range gameService.teams {
-		rows := gameService.spreadsheetService.readRange(team.sheet, "A2:K")
-
-		if len(rows.Values) > 0 {
-			i := 2
-			for _, row := range rows.Values {
-				if row[gameService.config.GameChannelIDColumn] != "FALSE" && row[gameService.config.GameChannelIDColumn] != "TRUE" {
-					date, error := time.Parse("02.01.2006 15:04", row[gameService.config.GameDateColumn].(string))
-					if error != nil {
-						glog.Fatalf("Unable to parse date. %v", error)
-					}
-
-					date = date.Add(12 * time.Hour)
-					if timeNow().After(date) {
-						message := gameService.messageBuilder.createGamePost(row)
-						gameService.slackService.slack.UpdateMessage(row[gameService.config.GameChannelIDColumn].(string), row[gameService.config.GameTimestampColumn].(string),
-							"~"+message.String()+"~")
-						if error != nil {
-							glog.Fatalf("Unable to post massage. %v", error)
-						}
-						glog.Info("updated Game")
-					}
-				}
-
-				i++
-			}
-		} else {
-			glog.Info("No data found.")
-		}
+func (gameService GameService) processPosted(row []interface{}, team teamConfig, rowNumber int) error {
+	date, error := time.Parse("02.01.2006 15:04", row[gameService.config.GameDateColumn].(string))
+	if error != nil {
+		glog.Warningf("Unable to parse date. %v", error)
+		return error
 	}
+
+	date = date.Add(6 * time.Hour)
+
+	if timeNow().After(date) {
+		message := gameService.IMessageBuilder.createGamePost(row)
+		_, _, _, error := gameService.ISlackService.updateMessage(row[gameService.config.GameChannelIDColumn].(string), row[gameService.config.GameTimestampColumn].(string),
+			"~"+message.String()+"~")
+		if error != nil {
+			glog.Warningf("Unable to post massage. %v", error)
+			return error
+		}
+
+		gameService.ISpreadsheetService.writeCell(team.sheet, rowNumber, gameService.config.GameStatusColumn, "OVER")
+		glog.Info("updated Game")
+	}
+	return nil
 }

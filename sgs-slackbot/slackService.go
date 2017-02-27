@@ -6,6 +6,7 @@ import (
 
 type ISlackService interface {
 	postMessage(channel string, message string) (string, string, error)
+	updateMessage(channel, timestamp, text string) (string, string, string, error)
 }
 
 // SlackService helps you to send messages to slack
@@ -25,4 +26,8 @@ func (slackService SlackService) postMessage(channel string, message string) (st
 	params := slack.NewPostMessageParameters()
 	params.AsUser = true
 	return slackService.slack.PostMessage(channel, message, params)
+}
+
+func (slackService SlackService) updateMessage(channel, timestamp, text string) (string, string, string, error) {
+	return slackService.slack.UpdateMessage(channel, timestamp, text)
 }

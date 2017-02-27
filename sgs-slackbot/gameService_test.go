@@ -28,6 +28,11 @@ func (mockSlackService MockSlackService) postMessage(channel string, message str
 	return args.String(0), args.String(1), args.Error(2)
 }
 
+func (mockSlackService MockSlackService) updateMessage(channel, timestamp, text string) (string, string, string, error) {
+	args := mockSlackService.Called(channel, timestamp, text)
+	return args.String(0), args.String(1), args.String(2), args.Error(3)
+}
+
 type MockMessageBuilder struct {
 	mock.Mock
 }
@@ -113,6 +118,65 @@ func TestProcessNewErrorPosting(t *testing.T) {
 	mockMessageBuilder.AssertExpectations(t)
 }
 
+func TestProcessPostedWrongDate(t *testing.T) {
+	main := Main{}
+	main.config = createConfig()
+
+	gameService := newGameService(&main)
+
+	row := createRow([]string{"POSTED", "05.05.1991"})
+
+	error := gameService.processPosted(row, createTeamConfig(), 0)
+	assert.NotNil(t, error)
+	assert.Contains(t, error.Error(), "cannot parse")
+}
+
+func TestProcessPosted(t *testing.T) {
+	main := Main{}
+	main.config = createConfig()
+
+	mockMessageBuilder := new(MockMessageBuilder)
+	main.IMessageBuilder = mockMessageBuilder
+	mockSlackService := new(MockSlackService)
+	main.ISlackService = mockSlackService
+	mockSpreadsheetService := new(MockSpreadsheetService)
+	main.ISpreadsheetService = mockSpreadsheetService
+
+	mockSlackService.On("updateMessage", "teamChannel", "Timestamp", "~createGamePost~").Return("nil", "nil", "nil", nil)
+	mockSpreadsheetService.On("writeCell", "teamSheet", 0, main.config.GameStatusColumn, "OVER").Return()
+
+	gameService := newGameService(&main)
+
+	row := createRow([]string{"POSTED", "05.05.1991 20:20", "teamChannel", "Timestamp"})
+	mockMessageBuilder.On("createGamePost", row).Return(createBuffer())
+
+	error := gameService.processPosted(row, createTeamConfig(), 0)
+	assert.Nil(t, error)
+	mockMessageBuilder.AssertExpectations(t)
+}
+
+func TestProcessPostedWithErrorWhileUpdating(t *testing.T) {
+	main := Main{}
+	main.config = createConfig()
+
+	mockMessageBuilder := new(MockMessageBuilder)
+	main.IMessageBuilder = mockMessageBuilder
+	mockSlackService := new(MockSlackService)
+	main.ISlackService = mockSlackService
+
+	mockSlackService.On("updateMessage", "teamChannel", "Timestamp", "~createGamePost~").Return("nil", "nil", "nil", errors.New("errorFromMock"))
+
+	gameService := newGameService(&main)
+
+	row := createRow([]string{"POSTED", "05.05.1991 20:20", "teamChannel", "Timestamp"})
+	mockMessageBuilder.On("createGamePost", row).Return(createBuffer())
+
+	error := gameService.processPosted(row, createTeamConfig(), 0)
+	assert.NotNil(t, error)
+	assert.Contains(t, error.Error(), "errorFromMock")
+	mockMessageBuilder.AssertExpectations(t)
+}
+
 func createRow(data []string) []interface{} {
 	row := make([]interface{}, len(data))
 	for i, s := range data {
@@ -128,6 +192,7 @@ func createConfig() *Config {
 		GamePostingDateColumn: 1,
 		GameChannelIDColumn:   2,
 		GameTimestampColumn:   3,
+		GameDateColumn:        1,
 	}
 	return &config
 }
