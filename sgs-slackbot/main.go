@@ -13,7 +13,7 @@ type Main struct {
 	slackService       *SlackService
 	spreadsheetService *SpreadsheetService
 	messageBuilder     *MessageBuilder
-	gameService        *GameService
+	eventService       *EventService
 	trainingService    *TrainingService
 	IMessageBuilder
 	ISlackService
@@ -36,7 +36,7 @@ func main() {
 	instance.IMessageBuilder = newMessageBuilder(instance.config, instance.slackService)
 	instance.ISpreadsheetService = newSpreadsheetService()
 	instance.trainingService = newTrainingService(&instance)
-	instance.gameService = newGameService(&instance)
+	instance.eventService = newEventService(&instance)
 
 	instance.run()
 
@@ -46,5 +46,5 @@ func main() {
 func (main Main) run() {
 	main.trainingService.process()
 
-	main.gameService.process()
+	main.eventService.process()
 }
