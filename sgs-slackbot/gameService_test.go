@@ -24,9 +24,9 @@ func TestProcessNew(t *testing.T) {
 	row := createRow([]string{"NEW", "05.06.1991 20:04", "FALSE"})
 	mockMessageBuilder.On("createGamePost", row).Return(createBuffer())
 	mockSlackService.On("postMessage", "teamChannel", "createGamePost").Return("channelID", "timestamp", nil)
-	mockSpreadsheetService.On("writeCell", "teamSheet", 0, main.config.GameStatusColumn, "POSTED").Return()
-	mockSpreadsheetService.On("writeCell", "teamSheet", 0, main.config.GameChannelIDColumn, "channelID").Return()
-	mockSpreadsheetService.On("writeCell", "teamSheet", 0, main.config.GameTimestampColumn, "timestamp").Return()
+	mockSpreadsheetService.On("writeCell", "teamSheet", 0, main.config.StatusColumn, "POSTED").Return()
+	mockSpreadsheetService.On("writeCell", "teamSheet", 0, main.config.ChannelIDColumn, "channelID").Return()
+	mockSpreadsheetService.On("writeCell", "teamSheet", 0, main.config.TimestampColumn, "timestamp").Return()
 
 	error := gameService.processNew(row, createTeamConfig(), 0)
 
@@ -94,7 +94,7 @@ func TestProcessPosted(t *testing.T) {
 	main.ISpreadsheetService = mockSpreadsheetService
 
 	mockSlackService.On("updateMessage", "teamChannel", "Timestamp", "~createGamePost~").Return("nil", "nil", "nil", nil)
-	mockSpreadsheetService.On("writeCell", "teamSheet", 0, main.config.GameStatusColumn, "OVER").Return()
+	mockSpreadsheetService.On("writeCell", "teamSheet", 0, main.config.StatusColumn, "OVER").Return()
 
 	gameService := newGameService(&main)
 
@@ -143,7 +143,7 @@ func TestProcessUpdate(t *testing.T) {
 	row := createRow([]string{"UPDATE", "05.05.1991 20:20", "teamChannel", "Timestamp"})
 	mockMessageBuilder.On("createGamePost", row).Return(createBuffer())
 	mockSlackService.On("updateMessage", "teamChannel", "Timestamp", "createGamePost").Return("nil", "nil", "nil", nil)
-	mockSpreadsheetService.On("writeCell", "teamSheet", 0, main.config.GameStatusColumn, "POSTED").Return()
+	mockSpreadsheetService.On("writeCell", "teamSheet", 0, main.config.StatusColumn, "POSTED").Return()
 
 	error := gameService.processUpdate(row, createTeamConfig(), 0)
 	assert.Nil(t, error)
@@ -182,11 +182,11 @@ func createRow(data []string) []interface{} {
 
 func createConfig() *Config {
 	config := Config{
-		GameStatusColumn:      0,
-		GamePostingDateColumn: 1,
-		GameChannelIDColumn:   2,
-		GameTimestampColumn:   3,
-		GameDateColumn:        1,
+		StatusColumn:      0,
+		PostingDateColumn: 1,
+		ChannelIDColumn:   2,
+		TimestampColumn:   3,
+		DateColumn:        1,
 	}
 	return &config
 }

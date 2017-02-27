@@ -18,25 +18,22 @@ type Config struct {
 	Games07Channel      string
 	Games16Channel      string
 
+	StatusColumn      int
+	PostingDateColumn int
+	ChannelIDColumn   int
+	TimestampColumn   int
+	DateColumn        int
+
+	TrainingUtensilsColumn          int
 	NameColumn                      int
 	DescriptionColumn               int
-	DateColumn                      int
-	PostingDateColumn               int
-	ChannelIDColumn                 int
-	TimestampColumn                 int
-	TrainingUtensilsColumn          int
 	TrainingUtensilsResponsibleText string
 
-	GameDateColumn        int
-	GamePostingDateColumn int
-	HomeColumn            int
-	AwayColumn            int
-	LocationColumn        int
-	LocationMapsColumn    int
-	SurfaceColumn         int
-	GameStatusColumn      int
-	GameChannelIDColumn   int
-	GameTimestampColumn   int
+	HomeColumn         int
+	AwayColumn         int
+	LocationColumn     int
+	LocationMapsColumn int
+	SurfaceColumn      int
 }
 
 func read(env string) *Config {

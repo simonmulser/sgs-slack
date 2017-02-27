@@ -36,13 +36,12 @@ func newGameService(main *Main) *GameService {
 
 func (gameService GameService) process() {
 	for _, team := range gameService.teams {
-		rows := gameService.ISpreadsheetService.readRange(team.sheet, "A2:K")
-
+		rows := gameService.ISpreadsheetService.readRange(team.sheet, "A2:L")
 		if len(rows.Values) > 0 {
 			i := 2
 			for _, row := range rows.Values {
 				var error error
-				switch row[gameService.config.GameStatusColumn] {
+				switch row[gameService.config.StatusColumn] {
 				case "NEW":
 					error = gameService.processNew(row, team, i)
 				case "POSTED":
@@ -67,7 +66,7 @@ func (gameService GameService) process() {
 }
 
 func (gameService GameService) processNew(row []interface{}, team teamConfig, rowNumber int) error {
-	postingDate, error := time.Parse("02.01.2006 15:04", row[gameService.config.GamePostingDateColumn].(string))
+	postingDate, error := time.Parse("02.01.2006 15:04", row[gameService.config.PostingDateColumn].(string))
 	if error != nil {
 		glog.Warningf("Unable to parse date. %v", error)
 		return error
@@ -81,16 +80,16 @@ func (gameService GameService) processNew(row []interface{}, team teamConfig, ro
 			return error
 		}
 
-		gameService.ISpreadsheetService.writeCell(team.sheet, rowNumber, gameService.config.GameStatusColumn, "POSTED")
-		gameService.ISpreadsheetService.writeCell(team.sheet, rowNumber, gameService.config.GameChannelIDColumn, channelID)
-		gameService.ISpreadsheetService.writeCell(team.sheet, rowNumber, gameService.config.GameTimestampColumn, timestamp)
+		gameService.ISpreadsheetService.writeCell(team.sheet, rowNumber, gameService.config.StatusColumn, "POSTED")
+		gameService.ISpreadsheetService.writeCell(team.sheet, rowNumber, gameService.config.ChannelIDColumn, channelID)
+		gameService.ISpreadsheetService.writeCell(team.sheet, rowNumber, gameService.config.TimestampColumn, timestamp)
 		glog.Info("posted Game and updated sheet")
 	}
 	return nil
 }
 
 func (gameService GameService) processPosted(row []interface{}, team teamConfig, rowNumber int) error {
-	date, error := time.Parse("02.01.2006 15:04", row[gameService.config.GameDateColumn].(string))
+	date, error := time.Parse("02.01.2006 15:04", row[gameService.config.DateColumn].(string))
 	if error != nil {
 		glog.Warningf("Unable to parse date. %v", error)
 		return error
@@ -100,14 +99,14 @@ func (gameService GameService) processPosted(row []interface{}, team teamConfig,
 
 	if timeNow().After(date) {
 		message := gameService.IMessageBuilder.createGamePost(row)
-		_, _, _, error := gameService.ISlackService.updateMessage(row[gameService.config.GameChannelIDColumn].(string), row[gameService.config.GameTimestampColumn].(string),
+		_, _, _, error := gameService.ISlackService.updateMessage(row[gameService.config.ChannelIDColumn].(string), row[gameService.config.TimestampColumn].(string),
 			"~"+message.String()+"~")
 		if error != nil {
 			glog.Warningf("Unable to post massage. %v", error)
 			return error
 		}
 
-		gameService.ISpreadsheetService.writeCell(team.sheet, rowNumber, gameService.config.GameStatusColumn, "OVER")
+		gameService.ISpreadsheetService.writeCell(team.sheet, rowNumber, gameService.config.StatusColumn, "OVER")
 		glog.Info("updated Game")
 	}
 	return nil
@@ -115,14 +114,14 @@ func (gameService GameService) processPosted(row []interface{}, team teamConfig,
 
 func (gameService GameService) processUpdate(row []interface{}, team teamConfig, rowNumber int) error {
 	message := gameService.IMessageBuilder.createGamePost(row)
-	_, _, _, error := gameService.ISlackService.updateMessage(row[gameService.config.GameChannelIDColumn].(string), row[gameService.config.GameTimestampColumn].(string), message.String())
+	_, _, _, error := gameService.ISlackService.updateMessage(row[gameService.config.ChannelIDColumn].(string), row[gameService.config.TimestampColumn].(string), message.String())
 
 	if error != nil {
 		glog.Warningf("Unable to post massage. %v", error)
 		return error
 	}
 
-	gameService.ISpreadsheetService.writeCell(team.sheet, rowNumber, gameService.config.GameStatusColumn, "POSTED")
+	gameService.ISpreadsheetService.writeCell(team.sheet, rowNumber, gameService.config.StatusColumn, "POSTED")
 	glog.Info("updated Game")
 	return nil
 }

@@ -51,7 +51,7 @@ func (messageBuilder MessageBuilder) createTrainingPost(row []interface{}) bytes
 func (messageBuilder MessageBuilder) createGamePost(row []interface{}) bytes.Buffer {
 	var buffer bytes.Buffer
 
-	meetingTime, error := time.Parse("02.01.2006 15:04", row[messageBuilder.config.GameDateColumn].(string))
+	meetingTime, error := time.Parse("02.01.2006 15:04", row[messageBuilder.config.DateColumn].(string))
 	if error != nil {
 		glog.Fatalf("Unable to parse date. %v", error)
 	}
@@ -62,7 +62,7 @@ func (messageBuilder MessageBuilder) createGamePost(row []interface{}) bytes.Buf
 	buffer.WriteString(" : ")
 	buffer.WriteString(row[messageBuilder.config.AwayColumn].(string))
 	buffer.WriteString("* am *")
-	buffer.WriteString(row[messageBuilder.config.GameDateColumn].(string))
+	buffer.WriteString(row[messageBuilder.config.DateColumn].(string))
 	buffer.WriteString("* Uhr auf ")
 	buffer.WriteString(row[messageBuilder.config.SurfaceColumn].(string))
 	buffer.WriteString("! Treffpunkt: ")
