@@ -48,13 +48,13 @@ func (messageBuilder MockMessageBuilder) createGamePost(row []interface{}) bytes
 }
 
 func (messageBuilder MockMessageBuilder) createTrainingMgmtPost(row []interface{}, params trainingParameters) bytes.Buffer {
-	var buffer bytes.Buffer
-	return buffer
+	args := messageBuilder.Called(row, params)
+	return args.Get(0).(bytes.Buffer)
 }
 
 func (messageBuilder MockMessageBuilder) createTrainingParams(reactions []slack.ItemReaction) trainingParameters {
-	var params trainingParameters
-	return params
+	args := messageBuilder.Called(reactions)
+	return args.Get(0).(trainingParameters)
 }
 
 func TestProcessNew(t *testing.T) {
