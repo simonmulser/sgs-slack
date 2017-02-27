@@ -7,6 +7,10 @@ import (
 	"google.golang.org/api/sheets/v4"
 )
 
+type ISpreadsheetService interface {
+	writeCell(sheet string, row int, column int, text string)
+}
+
 // SpreadsheetService helps you to interact with a sheet
 type SpreadsheetService struct {
 	service *sheets.Service

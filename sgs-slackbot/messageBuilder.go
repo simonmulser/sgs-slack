@@ -10,6 +10,13 @@ import (
 	"github.com/nlopes/slack"
 )
 
+type IMessageBuilder interface {
+	createTrainingPost(row []interface{}) bytes.Buffer
+	createGamePost(row []interface{}) bytes.Buffer
+	createTrainingMgmtPost(row []interface{}, params trainingParameters) bytes.Buffer
+	createTrainingParams(reactions []slack.ItemReaction) trainingParameters
+}
+
 // MessageBuilder helps you to build messages
 type MessageBuilder struct {
 	config       *Config

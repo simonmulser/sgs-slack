@@ -4,6 +4,10 @@ import (
 	"github.com/nlopes/slack"
 )
 
+type ISlackService interface {
+	postMessage(channel string, message string) (string, string, error)
+}
+
 // SlackService helps you to send messages to slack
 type SlackService struct {
 	slack *slack.Client

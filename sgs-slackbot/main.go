@@ -15,6 +15,9 @@ type Main struct {
 	messageBuilder     *MessageBuilder
 	gameService        *GameService
 	trainingService    *TrainingService
+	IMessageBuilder
+	ISlackService
+	ISpreadsheetService
 }
 
 func main() {
