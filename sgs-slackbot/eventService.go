@@ -19,6 +19,7 @@ type topicConfig struct {
 	sheet   string
 	channel string
 	IMessageBuilder
+	ITopicCommand
 }
 
 func newEventService(main *Main) *EventService {
@@ -27,9 +28,9 @@ func newEventService(main *Main) *EventService {
 	eventService.ISlackService = main.ISlackService
 	eventService.ISpreadsheetService = main.ISpreadsheetService
 
-	sgs07 := topicConfig{main.config.Games07Sheet, main.config.Games07Channel, newGameMessageBuilder(eventService.config)}
-	sgs16 := topicConfig{main.config.Games16Sheet, main.config.Games16Channel, newGameMessageBuilder(eventService.config)}
-	training := topicConfig{main.config.TrainingSheet, main.config.TrainingChannel, newGameMessageBuilder(eventService.config)}
+	sgs07 := topicConfig{main.config.Games07Sheet, main.config.Games07Channel, newGameMessageBuilder(eventService.config), nil}
+	sgs16 := topicConfig{main.config.Games16Sheet, main.config.Games16Channel, newGameMessageBuilder(eventService.config), nil}
+	training := topicConfig{main.config.TrainingSheet, main.config.TrainingChannel, newGameMessageBuilder(eventService.config), nil}
 	eventService.topics = []topicConfig{sgs07, sgs16, training}
 
 	return eventService
@@ -56,6 +57,10 @@ func (eventService EventService) process() {
 
 				if error != nil {
 					glog.Warningf("Could not process row %v", error)
+				}
+
+				if topic.ITopicCommand != nil {
+					topic.ITopicCommand.execute(row, topic, i)
 				}
 
 				i++

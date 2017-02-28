@@ -7,6 +7,10 @@ import (
 	"github.com/nlopes/slack"
 )
 
+type ITopicCommand interface {
+	execute(row []interface{}, topic topicConfig, rowNumber int) error
+}
+
 // TrainingService processes the trainings
 type TrainingService struct {
 	main *Main
