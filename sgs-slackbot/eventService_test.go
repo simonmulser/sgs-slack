@@ -78,7 +78,7 @@ func TestProcessPostedWrongDate(t *testing.T) {
 
 	eventService := newEventService(&main)
 
-	row := createRow([]string{"POSTED", "05.05.1991"})
+	row := createRow([]string{"POSTED", "05.05.1991 20:20", "topicChannel", "Timestamp", "05.05.1991"})
 
 	error := eventService.processPosted(row, topicConfig, 0)
 	assert.NotNil(t, error)
@@ -101,7 +101,7 @@ func TestProcessPosted(t *testing.T) {
 
 	eventService := newEventService(&main)
 
-	row := createRow([]string{"POSTED", "05.05.1991 20:20", "topicChannel", "Timestamp"})
+	row := createRow([]string{"POSTED", "05.05.1991 20:20", "topicChannel", "Timestamp", "05.05.1991 20:20"})
 	mockMessageBuilder.On("create", row).Return(createBuffer())
 
 	error := eventService.processPosted(row, topicConfig, 0)
@@ -120,7 +120,7 @@ func TestProcessPostedWithErrorWhileUpdating(t *testing.T) {
 
 	eventService := newEventService(&main)
 
-	row := createRow([]string{"POSTED", "05.05.1991 20:20", "topicChannel", "Timestamp"})
+	row := createRow([]string{"POSTED", "05.05.1991 20:20", "topicChannel", "Timestamp", "05.05.1991 20:20"})
 	mockMessageBuilder.On("create", row).Return(createBuffer())
 	mockSlackService.On("updateMessage", "topicChannel", "Timestamp", "~create~").Return("nil", "nil", "nil", errors.New("errorFromMock"))
 
@@ -185,11 +185,12 @@ func createRow(data []string) []interface{} {
 
 func createConfig() *Config {
 	config := Config{
-		StatusColumn:      0,
-		PostingDateColumn: 1,
-		ChannelIDColumn:   2,
-		TimestampColumn:   3,
-		DateColumn:        1,
+		StatusColumn:           0,
+		PostingDateColumn:      1,
+		ChannelIDColumn:        2,
+		TimestampColumn:        3,
+		DateColumn:             4,
+		TrainingUtensilsColumn: 5,
 	}
 	return &config
 }
