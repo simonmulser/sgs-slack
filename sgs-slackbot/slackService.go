@@ -8,6 +8,7 @@ type ISlackService interface {
 	postMessage(channel string, message string) (string, string, error)
 	updateMessage(channel, timestamp, text string) (string, string, string, error)
 	getUserInfo(user string) (*slack.User, error)
+	getReactions(item slack.ItemRef, params slack.GetReactionsParameters) ([]slack.ItemReaction, error)
 }
 
 // SlackService helps you to send messages to slack
@@ -35,4 +36,8 @@ func (slackService SlackService) updateMessage(channel, timestamp, text string) 
 
 func (slackService SlackService) getUserInfo(user string) (*slack.User, error) {
 	return slackService.slack.GetUserInfo(user)
+}
+
+func (slackService SlackService) getReactions(item slack.ItemRef, params slack.GetReactionsParameters) ([]slack.ItemReaction, error) {
+	return slackService.slack.GetReactions(item, params)
 }

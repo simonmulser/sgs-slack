@@ -44,6 +44,11 @@ func (mockSlackService MockSlackService) getUserInfo(user string) (*slack.User, 
 	return &slackUser, args.Error(1)
 }
 
+func (mockSlackService MockSlackService) getReactions(item slack.ItemRef, params slack.GetReactionsParameters) ([]slack.ItemReaction, error) {
+	args := mockSlackService.Called(item, params)
+	return args.Get(0).([]slack.ItemReaction), args.Error(1)
+}
+
 type MockMessageBuilder struct {
 	mock.Mock
 }
