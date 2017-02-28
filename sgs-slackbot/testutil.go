@@ -38,6 +38,12 @@ func (mockSlackService MockSlackService) updateMessage(channel, timestamp, text 
 	return args.String(0), args.String(1), args.String(2), args.Error(3)
 }
 
+func (mockSlackService MockSlackService) getUserInfo(user string) (*slack.User, error) {
+	args := mockSlackService.Called(user)
+	slackUser := args.Get(0).(slack.User)
+	return &slackUser, args.Error(1)
+}
+
 type MockMessageBuilder struct {
 	mock.Mock
 }

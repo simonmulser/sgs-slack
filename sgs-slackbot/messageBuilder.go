@@ -19,13 +19,13 @@ type IMessageBuilder interface {
 
 // MessageBuilder helps you to build messages
 type MessageBuilder struct {
-	config       *Config
-	slackService *SlackService
+	config *Config
+	ISlackService
 }
 
-func newMessageBuilder(config *Config, slackService *SlackService) *MessageBuilder {
+func newMessageBuilder(config *Config, slackService ISlackService) *MessageBuilder {
 	messageBuilder := new(MessageBuilder)
-	messageBuilder.slackService = slackService
+	messageBuilder.ISlackService = slackService
 	messageBuilder.config = config
 
 	return messageBuilder
@@ -122,7 +122,7 @@ func (messageBuilder MessageBuilder) createTrainingParams(reactions []slack.Item
 	params.TotalGoing = strconv.Itoa(countMuscle + countFacepunch)
 
 	if len(going) > 0 {
-		user, error := messageBuilder.slackService.slack.GetUserInfo(going[rand.Intn(len(going))])
+		user, error := messageBuilder.ISlackService.getUserInfo(going[rand.Intn(len(going))])
 		if error != nil {
 			glog.Fatalf("error: %v", error)
 		}
