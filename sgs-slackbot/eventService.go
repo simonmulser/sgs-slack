@@ -29,7 +29,8 @@ func newEventService(main *Main) *EventService {
 
 	sgs07 := topicConfig{main.config.Games07Sheet, main.config.Games07Channel, newGameMessageBuilder(eventService.config)}
 	sgs16 := topicConfig{main.config.Games16Sheet, main.config.Games16Channel, newGameMessageBuilder(eventService.config)}
-	eventService.topics = []topicConfig{sgs07, sgs16}
+	training := topicConfig{main.config.TrainingSheet, main.config.TrainingChannel, newGameMessageBuilder(eventService.config)}
+	eventService.topics = []topicConfig{sgs07, sgs16, training}
 
 	return eventService
 }
