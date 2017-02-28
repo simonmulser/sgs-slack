@@ -18,17 +18,17 @@ type EventService struct {
 type teamConfig struct {
 	sheet   string
 	channel string
+	IMessageBuilder
 }
 
 func newEventService(main *Main) *EventService {
 	eventService := new(EventService)
 	eventService.config = main.config
-	eventService.IMessageBuilder = main.IMessageBuilder
 	eventService.ISlackService = main.ISlackService
 	eventService.ISpreadsheetService = main.ISpreadsheetService
 
-	sgs07 := teamConfig{main.config.Games07Sheet, main.config.Games07Channel}
-	sgs16 := teamConfig{main.config.Games16Sheet, main.config.Games16Channel}
+	sgs07 := teamConfig{main.config.Games07Sheet, main.config.Games07Channel, newMessageBuilder(eventService.config, eventService.ISlackService)}
+	sgs16 := teamConfig{main.config.Games16Sheet, main.config.Games16Channel, newMessageBuilder(eventService.config, eventService.ISlackService)}
 	eventService.teams = []teamConfig{sgs07, sgs16}
 
 	return eventService
@@ -73,7 +73,7 @@ func (eventService EventService) processNew(row []interface{}, team teamConfig, 
 	}
 
 	if timeNow().After(postingDate) {
-		message := eventService.IMessageBuilder.createEventPost(row)
+		message := team.IMessageBuilder.createEventPost(row)
 		channelID, timestamp, error := eventService.ISlackService.postMessage(team.channel, message.String())
 		if error != nil {
 			glog.Warningf("Unable to post massage. %v", error)
@@ -98,7 +98,7 @@ func (eventService EventService) processPosted(row []interface{}, team teamConfi
 	date = date.Add(6 * time.Hour)
 
 	if timeNow().After(date) {
-		message := eventService.IMessageBuilder.createEventPost(row)
+		message := team.IMessageBuilder.createEventPost(row)
 		_, _, _, error := eventService.ISlackService.updateMessage(row[eventService.config.ChannelIDColumn].(string), row[eventService.config.TimestampColumn].(string),
 			"~"+message.String()+"~")
 		if error != nil {
@@ -113,7 +113,7 @@ func (eventService EventService) processPosted(row []interface{}, team teamConfi
 }
 
 func (eventService EventService) processUpdate(row []interface{}, team teamConfig, rowNumber int) error {
-	message := eventService.IMessageBuilder.createEventPost(row)
+	message := team.IMessageBuilder.createEventPost(row)
 	_, _, _, error := eventService.ISlackService.updateMessage(row[eventService.config.ChannelIDColumn].(string), row[eventService.config.TimestampColumn].(string), message.String())
 
 	if error != nil {

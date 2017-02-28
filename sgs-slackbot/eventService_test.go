@@ -12,7 +12,7 @@ func TestProcessNew(t *testing.T) {
 	main := Main{}
 	main.config = createConfig()
 
-	mockMessageBuilder := new(MockMessageBuilder)
+	teamConfig, mockMessageBuilder := createTeamConfig()
 	main.IMessageBuilder = mockMessageBuilder
 	mockSlackService := new(MockSlackService)
 	main.ISlackService = mockSlackService
@@ -28,7 +28,7 @@ func TestProcessNew(t *testing.T) {
 	mockSpreadsheetService.On("writeCell", "teamSheet", 0, main.config.ChannelIDColumn, "channelID").Return()
 	mockSpreadsheetService.On("writeCell", "teamSheet", 0, main.config.TimestampColumn, "timestamp").Return()
 
-	error := eventService.processNew(row, createTeamConfig(), 0)
+	error := eventService.processNew(row, teamConfig, 0)
 
 	assert.Nil(t, error)
 	mockMessageBuilder.AssertExpectations(t)
@@ -37,12 +37,14 @@ func TestProcessNew(t *testing.T) {
 func TestProcessNewWrongDate(t *testing.T) {
 	main := Main{}
 	main.config = createConfig()
+	teamConfig, _ := createTeamConfig()
 
 	eventService := newEventService(&main)
 
 	row := createRow([]string{"NEW", "05.06.1991"})
 
-	error := eventService.processNew(row, createTeamConfig(), 0)
+	error := eventService.processNew(row, teamConfig, 0)
+
 	assert.NotNil(t, error)
 	assert.Contains(t, error.Error(), "cannot parse")
 }
@@ -51,7 +53,7 @@ func TestProcessNewErrorPosting(t *testing.T) {
 	main := Main{}
 	main.config = createConfig()
 
-	mockMessageBuilder := new(MockMessageBuilder)
+	teamConfig, mockMessageBuilder := createTeamConfig()
 	main.IMessageBuilder = mockMessageBuilder
 	mockSlackService := new(MockSlackService)
 	main.ISlackService = mockSlackService
@@ -62,7 +64,7 @@ func TestProcessNewErrorPosting(t *testing.T) {
 	mockMessageBuilder.On("createEventPost", row).Return(createBuffer())
 	mockSlackService.On("postMessage", "teamChannel", "createEventPost").Return("test1", "test2", errors.New("errorFromMock"))
 
-	error := eventService.processNew(row, createTeamConfig(), 0)
+	error := eventService.processNew(row, teamConfig, 0)
 
 	assert.NotNil(t, error)
 	assert.Contains(t, error.Error(), "errorFromMock")
@@ -72,12 +74,13 @@ func TestProcessNewErrorPosting(t *testing.T) {
 func TestProcessPostedWrongDate(t *testing.T) {
 	main := Main{}
 	main.config = createConfig()
+	teamConfig, _ := createTeamConfig()
 
 	eventService := newEventService(&main)
 
 	row := createRow([]string{"POSTED", "05.05.1991"})
 
-	error := eventService.processPosted(row, createTeamConfig(), 0)
+	error := eventService.processPosted(row, teamConfig, 0)
 	assert.NotNil(t, error)
 	assert.Contains(t, error.Error(), "cannot parse")
 }
@@ -86,7 +89,7 @@ func TestProcessPosted(t *testing.T) {
 	main := Main{}
 	main.config = createConfig()
 
-	mockMessageBuilder := new(MockMessageBuilder)
+	teamConfig, mockMessageBuilder := createTeamConfig()
 	main.IMessageBuilder = mockMessageBuilder
 	mockSlackService := new(MockSlackService)
 	main.ISlackService = mockSlackService
@@ -101,7 +104,7 @@ func TestProcessPosted(t *testing.T) {
 	row := createRow([]string{"POSTED", "05.05.1991 20:20", "teamChannel", "Timestamp"})
 	mockMessageBuilder.On("createEventPost", row).Return(createBuffer())
 
-	error := eventService.processPosted(row, createTeamConfig(), 0)
+	error := eventService.processPosted(row, teamConfig, 0)
 	assert.Nil(t, error)
 	mockMessageBuilder.AssertExpectations(t)
 }
@@ -110,7 +113,7 @@ func TestProcessPostedWithErrorWhileUpdating(t *testing.T) {
 	main := Main{}
 	main.config = createConfig()
 
-	mockMessageBuilder := new(MockMessageBuilder)
+	teamConfig, mockMessageBuilder := createTeamConfig()
 	main.IMessageBuilder = mockMessageBuilder
 	mockSlackService := new(MockSlackService)
 	main.ISlackService = mockSlackService
@@ -121,7 +124,7 @@ func TestProcessPostedWithErrorWhileUpdating(t *testing.T) {
 	mockMessageBuilder.On("createEventPost", row).Return(createBuffer())
 	mockSlackService.On("updateMessage", "teamChannel", "Timestamp", "~createEventPost~").Return("nil", "nil", "nil", errors.New("errorFromMock"))
 
-	error := eventService.processPosted(row, createTeamConfig(), 0)
+	error := eventService.processPosted(row, teamConfig, 0)
 	assert.NotNil(t, error)
 	assert.Contains(t, error.Error(), "errorFromMock")
 	mockMessageBuilder.AssertExpectations(t)
@@ -131,7 +134,7 @@ func TestProcessUpdate(t *testing.T) {
 	main := Main{}
 	main.config = createConfig()
 
-	mockMessageBuilder := new(MockMessageBuilder)
+	teamConfig, mockMessageBuilder := createTeamConfig()
 	main.IMessageBuilder = mockMessageBuilder
 	mockSlackService := new(MockSlackService)
 	main.ISlackService = mockSlackService
@@ -145,7 +148,7 @@ func TestProcessUpdate(t *testing.T) {
 	mockSlackService.On("updateMessage", "teamChannel", "Timestamp", "createEventPost").Return("nil", "nil", "nil", nil)
 	mockSpreadsheetService.On("writeCell", "teamSheet", 0, main.config.StatusColumn, "POSTED").Return()
 
-	error := eventService.processUpdate(row, createTeamConfig(), 0)
+	error := eventService.processUpdate(row, teamConfig, 0)
 	assert.Nil(t, error)
 	mockMessageBuilder.AssertExpectations(t)
 }
@@ -154,7 +157,7 @@ func TestProcessUpdateErrorWhileUpdating(t *testing.T) {
 	main := Main{}
 	main.config = createConfig()
 
-	mockMessageBuilder := new(MockMessageBuilder)
+	teamConfig, mockMessageBuilder := createTeamConfig()
 	main.IMessageBuilder = mockMessageBuilder
 	mockSlackService := new(MockSlackService)
 	main.ISlackService = mockSlackService
@@ -165,7 +168,7 @@ func TestProcessUpdateErrorWhileUpdating(t *testing.T) {
 	mockMessageBuilder.On("createEventPost", row).Return(createBuffer())
 	mockSlackService.On("updateMessage", "teamChannel", "Timestamp", "createEventPost").Return("nil", "nil", "nil", errors.New("errorFromMock"))
 
-	error := eventService.processUpdate(row, createTeamConfig(), 0)
+	error := eventService.processUpdate(row, teamConfig, 0)
 	assert.NotNil(t, error)
 	assert.Contains(t, error.Error(), "errorFromMock")
 	mockMessageBuilder.AssertExpectations(t)
@@ -197,10 +200,12 @@ func createBuffer() bytes.Buffer {
 	return buffer
 }
 
-func createTeamConfig() teamConfig {
+func createTeamConfig() (teamConfig, *MockMessageBuilder) {
+	messageBuilder := new(MockMessageBuilder)
 	config := teamConfig{
-		sheet:   "teamSheet",
-		channel: "teamChannel",
+		sheet:           "teamSheet",
+		channel:         "teamChannel",
+		IMessageBuilder: messageBuilder,
 	}
-	return config
+	return config, messageBuilder
 }
