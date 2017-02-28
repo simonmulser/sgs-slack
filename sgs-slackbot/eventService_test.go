@@ -186,12 +186,14 @@ func createRow(data []string) []interface{} {
 
 func createConfig() *Config {
 	config := Config{
-		StatusColumn:           0,
-		PostingDateColumn:      1,
-		ChannelIDColumn:        2,
-		TimestampColumn:        3,
-		DateColumn:             4,
-		TrainingUtensilsColumn: 5,
+		StatusColumn:                    0,
+		PostingDateColumn:               1,
+		ChannelIDColumn:                 2,
+		TimestampColumn:                 3,
+		DateColumn:                      4,
+		TrainingUtensilsColumn:          5,
+		TrainingUtensilsResponsibleText: "FancyText",
+		TrainingMgmtChannel:             "channelID",
 	}
 	return &config
 }
