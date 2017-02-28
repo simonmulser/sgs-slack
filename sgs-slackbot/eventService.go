@@ -60,7 +60,10 @@ func (eventService EventService) process() {
 				}
 
 				if topic.ITopicCommand != nil {
-					topic.ITopicCommand.execute(row, topic, i)
+					error := topic.ITopicCommand.execute(row, topic, i)
+					if error != nil {
+						glog.Warningf("Could not execute command %v", error)
+					}
 				}
 
 				i++
