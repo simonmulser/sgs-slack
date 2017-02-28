@@ -27,8 +27,8 @@ func newEventService(main *Main) *EventService {
 	eventService.ISlackService = main.ISlackService
 	eventService.ISpreadsheetService = main.ISpreadsheetService
 
-	sgs07 := topicConfig{main.config.Games07Sheet, main.config.Games07Channel, newMessageBuilder(eventService.config, eventService.ISlackService)}
-	sgs16 := topicConfig{main.config.Games16Sheet, main.config.Games16Channel, newMessageBuilder(eventService.config, eventService.ISlackService)}
+	sgs07 := topicConfig{main.config.Games07Sheet, main.config.Games07Channel, newGameMessageBuilder(eventService.config)}
+	sgs16 := topicConfig{main.config.Games16Sheet, main.config.Games16Channel, newGameMessageBuilder(eventService.config)}
 	eventService.topics = []topicConfig{sgs07, sgs16}
 
 	return eventService
