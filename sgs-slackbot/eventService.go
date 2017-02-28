@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"time"
 
 	"github.com/golang/glog"
@@ -20,6 +21,10 @@ type topicConfig struct {
 	channel string
 	IMessageBuilder
 	ITopicCommand
+}
+
+type IMessageBuilder interface {
+	create(row []interface{}) bytes.Buffer
 }
 
 func newEventService(main *Main) *EventService {
