@@ -9,6 +9,15 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+type MockTrainingParamsService struct {
+	mock.Mock
+}
+
+func (mockTrainingParamsService MockTrainingParamsService) create(reactions []slack.ItemReaction) trainingParameters {
+	args := mockTrainingParamsService.Called(reactions)
+	return args.Get(0).(trainingParameters)
+}
+
 type MockSpreadsheetService struct {
 	mock.Mock
 }

@@ -2,8 +2,6 @@ package main
 
 import (
 	"bytes"
-	"math/rand"
-	"strconv"
 	"time"
 
 	"github.com/golang/glog"
@@ -19,13 +17,15 @@ type TrainingService struct {
 	config *Config
 	ISlackService
 	ISpreadsheetService
+	ITrainingParamsService
 }
 
-func newTrainingService(config *Config, slackService ISlackService, spreadsheetService ISpreadsheetService) *TrainingService {
+func newTrainingService(config *Config, slackService ISlackService, spreadsheetService ISpreadsheetService, trainingParamsService ITrainingParamsService) *TrainingService {
 	trainingService := new(TrainingService)
 	trainingService.config = config
 	trainingService.ISlackService = slackService
 	trainingService.ISpreadsheetService = spreadsheetService
+	trainingService.ITrainingParamsService = trainingParamsService
 
 	return trainingService
 }
@@ -48,7 +48,7 @@ func (trainingService TrainingService) execute(row []interface{}, topic topicCon
 			return error
 		}
 
-		params := trainingService.createTrainingParams(reactions)
+		params := trainingService.ITrainingParamsService.create(reactions)
 		message := trainingService.createTrainingMgmtPost(row, params)
 
 		trainingService.ISlackService.postMessage(trainingService.config.TrainingMgmtChannel, message.String())
@@ -82,36 +82,4 @@ func (trainingService TrainingService) createTrainingMgmtPost(row []interface{},
 	}
 
 	return buffer
-}
-
-func (trainingService TrainingService) createTrainingParams(reactions []slack.ItemReaction) trainingParameters {
-	var params trainingParameters
-	var going []string
-	countMuscle := 0
-	countFacepunch := 0
-
-	for _, reaction := range reactions {
-		if reaction.Name == "muscle" {
-			countMuscle = reaction.Count
-			going = append(going, reaction.Users...)
-		}
-		if reaction.Name == "facepunch" {
-			countFacepunch = reaction.Count
-			going = append(going, reaction.Users...)
-		}
-	}
-
-	params.GoingSGS07 = strconv.Itoa(countMuscle)
-	params.GoingSGS16 = strconv.Itoa(countFacepunch)
-	params.TotalGoing = strconv.Itoa(countMuscle + countFacepunch)
-
-	if len(going) > 0 {
-		user, error := trainingService.ISlackService.getUserInfo(going[rand.Intn(len(going))])
-		if error != nil {
-			glog.Fatalf("error: %v", error)
-		}
-		params.ResponsibleTrainingUtensils = user.Name
-	}
-
-	return params
 }

@@ -19,7 +19,10 @@ func TestExecute(t *testing.T) {
 	mockSpreadsheetService := new(MockSpreadsheetService)
 	mockSpreadsheetService.On("writeCell", "", 0, config.TrainingUtensilsColumn, "POSTED").Return()
 
-	trainingService := newTrainingService(config, mockSlackService, mockSpreadsheetService)
+	mockTrainingParamsService := new(MockTrainingParamsService)
+	mockTrainingParamsService.On("create", mock.MatchedBy(func(r []slack.ItemReaction) bool { return true })).Return(trainingParameters{"", "", "", ""})
+
+	trainingService := newTrainingService(config, mockSlackService, mockSpreadsheetService, mockTrainingParamsService)
 	row := createRow([]string{"POSTED", "05.05.1991 20:20", "channelID", "Timestamp", "05.05.1991 20:20", "NOT_POSTED"})
 
 	error := trainingService.execute(row, topicConfig, 0)
@@ -34,8 +37,9 @@ func TestExecuteErrorFromSlack(t *testing.T) {
 	itemRef := slack.ItemRef{Channel: "channelID", Timestamp: "Timestamp"}
 	mockSlackService.On("getReactions", itemRef, slack.GetReactionsParameters{false}).Return([]slack.ItemReaction{}, errors.New("errorFromMock"))
 	mockSpreadsheetService := new(MockSpreadsheetService)
+	mockTrainingParamsService := new(MockTrainingParamsService)
 
-	trainingService := newTrainingService(createConfig(), mockSlackService, mockSpreadsheetService)
+	trainingService := newTrainingService(createConfig(), mockSlackService, mockSpreadsheetService, mockTrainingParamsService)
 	row := createRow([]string{"POSTED", "", "channelID", "Timestamp", "05.05.1991 20:20", "NOT_POSTED"})
 
 	error := trainingService.execute(row, topicConfig, 0)
@@ -49,8 +53,9 @@ func TestExecuteWrongDate(t *testing.T) {
 	topicConfig, _ := createTopicConfig()
 	mockSlackService := new(MockSlackService)
 	mockSpreadsheetService := new(MockSpreadsheetService)
+	mockTrainingParamsService := new(MockTrainingParamsService)
 
-	trainingService := newTrainingService(createConfig(), mockSlackService, mockSpreadsheetService)
+	trainingService := newTrainingService(createConfig(), mockSlackService, mockSpreadsheetService, mockTrainingParamsService)
 	row := createRow([]string{"", "", "", "", "05.05.1991"})
 
 	error := trainingService.execute(row, topicConfig, 0)
