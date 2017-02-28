@@ -1,6 +1,9 @@
 package main
 
 import (
+	"bytes"
+	"math/rand"
+	"strconv"
 	"time"
 
 	"github.com/golang/glog"
@@ -13,113 +16,102 @@ type ITopicCommand interface {
 
 // TrainingService processes the trainings
 type TrainingService struct {
-	main *Main
+	config *Config
+	ISlackService
+	ISpreadsheetService
 }
 
-func newTrainingService(main *Main) *TrainingService {
+func newTrainingService(config *Config, slackService ISlackService, spreadsheetService ISpreadsheetService) *TrainingService {
 	trainingService := new(TrainingService)
-	trainingService.main = main
+	trainingService.config = config
+	trainingService.ISlackService = slackService
+	trainingService.ISpreadsheetService = spreadsheetService
 
 	return trainingService
 }
 
-func (trainingService TrainingService) process() {
-	trainingService.postTrainings()
-	trainingService.selectResponsibleForUtensils()
-	trainingService.strikeTroughOldTrainings()
+func (trainingService TrainingService) execute(row []interface{}, topic topicConfig, rowNumber int) error {
+	date, error := time.Parse("02.01.2006 15:04", row[trainingService.config.DateColumn].(string))
+	if error != nil {
+		glog.Warningf("Unable to parse date. %v", error)
+		return error
+	}
+	date = date.Add(-8 * 60 * time.Minute)
+
+	if row[trainingService.config.StatusColumn] == "POSTED" && row[trainingService.config.TrainingUtensilsColumn] != "POSTED" && timeNow().After(date) {
+		reactions, error := trainingService.ISlackService.getReactions(
+			slack.ItemRef{Channel: row[trainingService.config.ChannelIDColumn].(string), Timestamp: row[trainingService.config.TimestampColumn].(string)},
+			slack.GetReactionsParameters{})
+
+		if error != nil {
+			glog.Warningf("Unable to get reactions. %v", error)
+			return error
+		}
+
+		params := trainingService.createTrainingParams(reactions)
+		message := trainingService.createTrainingMgmtPost(row, params)
+
+		trainingService.ISlackService.postMessage(trainingService.config.TrainingMgmtChannel, message.String())
+		trainingService.ISlackService.postMessage("@"+params.ResponsibleTrainingUtensils, trainingService.config.TrainingUtensilsResponsibleText)
+		trainingService.ISpreadsheetService.writeCell(trainingService.config.TrainingSheet, rowNumber, trainingService.config.TrainingUtensilsColumn, "POSTED")
+		glog.Info("selected responsible person and updated sheets")
+	}
+
+	return nil
 }
 
-func (trainingService TrainingService) postTrainings() {
-	rows := trainingService.main.spreadsheetService.readRange(trainingService.main.config.TrainingSheet, "A2:G")
+func (trainingService TrainingService) createTrainingMgmtPost(row []interface{}, params trainingParameters) bytes.Buffer {
+	var buffer bytes.Buffer
+	buffer.WriteString("Ban Training heint (")
+	buffer.WriteString(row[trainingService.config.NameColumn].(string))
+	buffer.WriteString(" - ")
+	buffer.WriteString(row[trainingService.config.DateColumn].(string))
+	buffer.WriteString(")")
+	buffer.WriteString(" sein insgesomt *")
+	buffer.WriteString(params.TotalGoing)
+	buffer.WriteString("*, *")
+	buffer.WriteString(params.GoingSGS07)
+	buffer.WriteString(" SGS07* und *")
+	buffer.WriteString(params.GoingSGS16)
+	buffer.WriteString(" SGS16*.\n")
 
-	if len(rows.Values) > 0 {
-		i := 2
-		for _, row := range rows.Values {
-			postingDate, error := time.Parse("02.01.2006 15:04", row[trainingService.main.config.PostingDateColumn].(string))
-			if error != nil {
-				glog.Fatalf("Unable to parse date. %v", error)
-			}
-
-			if row[trainingService.main.config.ChannelIDColumn] == "FALSE" && timeNow().After(postingDate) {
-				message := trainingService.main.messageBuilder.createTrainingPost(row)
-				channelID, timestamp, error := trainingService.main.slackService.postMessage(trainingService.main.config.TrainingChannel, message.String())
-				if error != nil {
-					glog.Fatalf("Unable to post message. %v", error)
-				}
-
-				trainingService.main.spreadsheetService.writeCell(trainingService.main.config.TrainingSheet, i, trainingService.main.config.ChannelIDColumn, channelID)
-				trainingService.main.spreadsheetService.writeCell(trainingService.main.config.TrainingSheet, i, trainingService.main.config.TimestampColumn, timestamp)
-				glog.Info("posted Training and updated sheet")
-			}
-
-			i++
-		}
-	} else {
-		glog.Info("No data found.")
+	if params.ResponsibleTrainingUtensils != "" {
+		buffer.WriteString("Für Trainingsutensilien zuständig: *")
+		buffer.WriteString(params.ResponsibleTrainingUtensils)
+		buffer.WriteString("!*")
 	}
+
+	return buffer
 }
 
-func (trainingService TrainingService) selectResponsibleForUtensils() {
-	rows := trainingService.main.spreadsheetService.readRange(trainingService.main.config.TrainingSheet, "A2:G")
+func (trainingService TrainingService) createTrainingParams(reactions []slack.ItemReaction) trainingParameters {
+	var params trainingParameters
+	var going []string
+	countMuscle := 0
+	countFacepunch := 0
 
-	if len(rows.Values) > 0 {
-		i := 2
-		for _, row := range rows.Values {
-			date, error := time.Parse("02.01.2006 15:04", row[trainingService.main.config.DateColumn].(string))
-			if error != nil {
-				glog.Fatalf("Unable to parse date. %v", error)
-			}
-			date = date.Add(-8 * 60 * time.Minute)
-
-			if row[trainingService.main.config.ChannelIDColumn] != "FALSE" && row[trainingService.main.config.TrainingUtensilsColumn] == "FALSE" && timeNow().After(date) {
-				reactions, error := trainingService.main.slackService.slack.GetReactions(
-					slack.ItemRef{Channel: row[trainingService.main.config.ChannelIDColumn].(string), Timestamp: row[trainingService.main.config.TimestampColumn].(string)},
-					slack.GetReactionsParameters{})
-				if error != nil {
-					glog.Fatalf("Unable to get reactions. %v", error)
-				}
-
-				params := trainingService.main.messageBuilder.createTrainingParams(reactions)
-				message := trainingService.main.messageBuilder.createTrainingMgmtPost(row, params)
-				trainingService.main.slackService.postMessage(trainingService.main.config.TrainingMgmtChannel, message.String())
-				trainingService.main.slackService.postMessage("@"+params.ResponsibleTrainingUtensils, trainingService.main.config.TrainingUtensilsResponsibleText)
-				trainingService.main.spreadsheetService.writeCell(trainingService.main.config.TrainingSheet, i, trainingService.main.config.TrainingUtensilsColumn, "TRUE")
-				glog.Info("selected responsible person and updated sheets")
-			}
-			i++
+	for _, reaction := range reactions {
+		if reaction.Name == "muscle" {
+			countMuscle = reaction.Count
+			going = append(going, reaction.Users...)
 		}
-	} else {
-		glog.Info("No data found.")
-	}
-}
-
-func (trainingService TrainingService) strikeTroughOldTrainings() {
-	rows := trainingService.main.spreadsheetService.readRange(trainingService.main.config.TrainingSheet, "A2:G")
-
-	if len(rows.Values) > 0 {
-		i := 2
-		for _, row := range rows.Values {
-			if row[trainingService.main.config.ChannelIDColumn] != "FALSE" && row[trainingService.main.config.ChannelIDColumn] != "TRUE" {
-				date, error := time.Parse("02.01.2006 15:04", row[trainingService.main.config.DateColumn].(string))
-				if error != nil {
-					glog.Fatalf("Unable to parse date. %v", error)
-				}
-
-				date = date.Add(12 * time.Hour)
-				if timeNow().After(date) {
-					message := trainingService.main.messageBuilder.createTrainingPost(row)
-					trainingService.main.slackService.slack.UpdateMessage(row[trainingService.main.config.ChannelIDColumn].(string), row[trainingService.main.config.TimestampColumn].(string),
-						"~"+message.String()+"~")
-					if error != nil {
-						glog.Fatalf("Unable to post massage. %v", error)
-					}
-					glog.Info("updated Training")
-				}
-			}
-
-			i++
+		if reaction.Name == "facepunch" {
+			countFacepunch = reaction.Count
+			going = append(going, reaction.Users...)
 		}
-	} else {
-		glog.Info("No data found.")
 	}
+
+	params.GoingSGS07 = strconv.Itoa(countMuscle)
+	params.GoingSGS16 = strconv.Itoa(countFacepunch)
+	params.TotalGoing = strconv.Itoa(countMuscle + countFacepunch)
+
+	if len(going) > 0 {
+		user, error := trainingService.ISlackService.getUserInfo(going[rand.Intn(len(going))])
+		if error != nil {
+			glog.Fatalf("error: %v", error)
+		}
+		params.ResponsibleTrainingUtensils = user.Name
+	}
+
+	return params
 }

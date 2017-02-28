@@ -2,12 +2,9 @@ package main
 
 import (
 	"bytes"
-	"math/rand"
-	"strconv"
 	"time"
 
 	"github.com/golang/glog"
-	"github.com/nlopes/slack"
 )
 
 type IMessageBuilder interface {
@@ -71,60 +68,4 @@ func (messageBuilder MessageBuilder) create(row []interface{}) bytes.Buffer {
 	buffer.WriteString(".")
 
 	return buffer
-}
-
-func (messageBuilder MessageBuilder) createTrainingMgmtPost(row []interface{}, params trainingParameters) bytes.Buffer {
-	var buffer bytes.Buffer
-	buffer.WriteString("Ban Training heint (")
-	buffer.WriteString(row[messageBuilder.config.NameColumn].(string))
-	buffer.WriteString(" - ")
-	buffer.WriteString(row[messageBuilder.config.DateColumn].(string))
-	buffer.WriteString(")")
-	buffer.WriteString(" sein insgesomt *")
-	buffer.WriteString(params.TotalGoing)
-	buffer.WriteString("*, *")
-	buffer.WriteString(params.GoingSGS07)
-	buffer.WriteString(" SGS07* und *")
-	buffer.WriteString(params.GoingSGS16)
-	buffer.WriteString(" SGS16*.\n")
-
-	if params.ResponsibleTrainingUtensils != "" {
-		buffer.WriteString("Für Trainingsutensilien zuständig: *")
-		buffer.WriteString(params.ResponsibleTrainingUtensils)
-		buffer.WriteString("!*")
-	}
-
-	return buffer
-}
-
-func (messageBuilder MessageBuilder) createTrainingParams(reactions []slack.ItemReaction) trainingParameters {
-	var params trainingParameters
-	var going []string
-	countMuscle := 0
-	countFacepunch := 0
-
-	for _, reaction := range reactions {
-		if reaction.Name == "muscle" {
-			countMuscle = reaction.Count
-			going = append(going, reaction.Users...)
-		}
-		if reaction.Name == "facepunch" {
-			countFacepunch = reaction.Count
-			going = append(going, reaction.Users...)
-		}
-	}
-
-	params.GoingSGS07 = strconv.Itoa(countMuscle)
-	params.GoingSGS16 = strconv.Itoa(countFacepunch)
-	params.TotalGoing = strconv.Itoa(countMuscle + countFacepunch)
-
-	if len(going) > 0 {
-		user, error := messageBuilder.ISlackService.getUserInfo(going[rand.Intn(len(going))])
-		if error != nil {
-			glog.Fatalf("error: %v", error)
-		}
-		params.ResponsibleTrainingUtensils = user.Name
-	}
-
-	return params
 }
