@@ -29,7 +29,7 @@ type MockSlackService struct {
 }
 
 func (mockSlackService MockSlackService) postMessage(channel string, message string) (string, string, error) {
-	args := mockSlackService.Called(channel, message)
+	args := mockSlackService.Called([]string{channel, message})
 	return args.String(0), args.String(1), args.Error(2)
 }
 

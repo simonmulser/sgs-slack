@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestProcessNew(t *testing.T) {
@@ -23,7 +24,7 @@ func TestProcessNew(t *testing.T) {
 
 	row := createRow([]string{"NEW", "05.06.1991 20:04"})
 	mockMessageBuilder.On("create", row).Return(createBuffer())
-	mockSlackService.On("postMessage", "topicChannel", "create").Return("channelID", "timestamp", nil)
+	mockSlackService.On("postMessage", mock.MatchedBy(func(s []string) bool { return true })).Return("channelID", "timestamp", nil)
 	mockSpreadsheetService.On("writeCell", "topicSheet", 0, main.config.StatusColumn, "POSTED").Return()
 	mockSpreadsheetService.On("writeCell", "topicSheet", 0, main.config.ChannelIDColumn, "channelID").Return()
 	mockSpreadsheetService.On("writeCell", "topicSheet", 0, main.config.TimestampColumn, "timestamp").Return()
@@ -62,7 +63,7 @@ func TestProcessNewErrorPosting(t *testing.T) {
 
 	row := createRow([]string{"NEW", "05.06.1991 20:04"})
 	mockMessageBuilder.On("create", row).Return(createBuffer())
-	mockSlackService.On("postMessage", "topicChannel", "create").Return("test1", "test2", errors.New("errorFromMock"))
+	mockSlackService.On("postMessage", mock.MatchedBy(func(s []string) bool { return true })).Return("test1", "test2", errors.New("errorFromMock"))
 
 	error := eventService.processNew(row, topicConfig, 0)
 
