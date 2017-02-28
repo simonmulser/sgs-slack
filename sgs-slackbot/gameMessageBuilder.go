@@ -25,7 +25,7 @@ func (messageBuilder GameMessageBuilder) createTrainingPost(row []interface{}) b
 	return buffer
 }
 
-func (messageBuilder GameMessageBuilder) createEventPost(row []interface{}) bytes.Buffer {
+func (messageBuilder GameMessageBuilder) create(row []interface{}) bytes.Buffer {
 	var buffer bytes.Buffer
 
 	meetingTime, error := time.Parse("02.01.2006 15:04", row[messageBuilder.config.DateColumn].(string))

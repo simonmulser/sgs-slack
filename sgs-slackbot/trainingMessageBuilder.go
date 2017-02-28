@@ -26,7 +26,7 @@ func (messageBuilder TrainingBuilder) createTrainingPost(row []interface{}) byte
 	return buffer
 }
 
-func (messageBuilder TrainingBuilder) createEventPost(row []interface{}) bytes.Buffer {
+func (messageBuilder TrainingBuilder) create(row []interface{}) bytes.Buffer {
 	var buffer bytes.Buffer
 
 	buffer.WriteString(row[messageBuilder.config.NameColumn].(string))

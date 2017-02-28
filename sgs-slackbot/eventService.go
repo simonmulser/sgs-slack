@@ -74,7 +74,7 @@ func (eventService EventService) processNew(row []interface{}, topic topicConfig
 	}
 
 	if timeNow().After(postingDate) {
-		message := topic.IMessageBuilder.createEventPost(row)
+		message := topic.IMessageBuilder.create(row)
 		channelID, timestamp, error := eventService.ISlackService.postMessage(topic.channel, message.String())
 		if error != nil {
 			glog.Warningf("Unable to post massage. %v", error)
@@ -99,7 +99,7 @@ func (eventService EventService) processPosted(row []interface{}, topic topicCon
 	date = date.Add(6 * time.Hour)
 
 	if timeNow().After(date) {
-		message := topic.IMessageBuilder.createEventPost(row)
+		message := topic.IMessageBuilder.create(row)
 		_, _, _, error := eventService.ISlackService.updateMessage(row[eventService.config.ChannelIDColumn].(string), row[eventService.config.TimestampColumn].(string),
 			"~"+message.String()+"~")
 		if error != nil {
@@ -114,7 +114,7 @@ func (eventService EventService) processPosted(row []interface{}, topic topicCon
 }
 
 func (eventService EventService) processUpdate(row []interface{}, topic topicConfig, rowNumber int) error {
-	message := topic.IMessageBuilder.createEventPost(row)
+	message := topic.IMessageBuilder.create(row)
 	_, _, _, error := eventService.ISlackService.updateMessage(row[eventService.config.ChannelIDColumn].(string), row[eventService.config.TimestampColumn].(string), message.String())
 
 	if error != nil {

@@ -22,8 +22,8 @@ func TestProcessNew(t *testing.T) {
 	eventService := newEventService(&main)
 
 	row := createRow([]string{"NEW", "05.06.1991 20:04"})
-	mockMessageBuilder.On("createEventPost", row).Return(createBuffer())
-	mockSlackService.On("postMessage", "topicChannel", "createEventPost").Return("channelID", "timestamp", nil)
+	mockMessageBuilder.On("create", row).Return(createBuffer())
+	mockSlackService.On("postMessage", "topicChannel", "create").Return("channelID", "timestamp", nil)
 	mockSpreadsheetService.On("writeCell", "topicSheet", 0, main.config.StatusColumn, "POSTED").Return()
 	mockSpreadsheetService.On("writeCell", "topicSheet", 0, main.config.ChannelIDColumn, "channelID").Return()
 	mockSpreadsheetService.On("writeCell", "topicSheet", 0, main.config.TimestampColumn, "timestamp").Return()
@@ -61,8 +61,8 @@ func TestProcessNewErrorPosting(t *testing.T) {
 	eventService := newEventService(&main)
 
 	row := createRow([]string{"NEW", "05.06.1991 20:04"})
-	mockMessageBuilder.On("createEventPost", row).Return(createBuffer())
-	mockSlackService.On("postMessage", "topicChannel", "createEventPost").Return("test1", "test2", errors.New("errorFromMock"))
+	mockMessageBuilder.On("create", row).Return(createBuffer())
+	mockSlackService.On("postMessage", "topicChannel", "create").Return("test1", "test2", errors.New("errorFromMock"))
 
 	error := eventService.processNew(row, topicConfig, 0)
 
@@ -96,13 +96,13 @@ func TestProcessPosted(t *testing.T) {
 	mockSpreadsheetService := new(MockSpreadsheetService)
 	main.ISpreadsheetService = mockSpreadsheetService
 
-	mockSlackService.On("updateMessage", "topicChannel", "Timestamp", "~createEventPost~").Return("nil", "nil", "nil", nil)
+	mockSlackService.On("updateMessage", "topicChannel", "Timestamp", "~create~").Return("nil", "nil", "nil", nil)
 	mockSpreadsheetService.On("writeCell", "topicSheet", 0, main.config.StatusColumn, "OVER").Return()
 
 	eventService := newEventService(&main)
 
 	row := createRow([]string{"POSTED", "05.05.1991 20:20", "topicChannel", "Timestamp"})
-	mockMessageBuilder.On("createEventPost", row).Return(createBuffer())
+	mockMessageBuilder.On("create", row).Return(createBuffer())
 
 	error := eventService.processPosted(row, topicConfig, 0)
 	assert.Nil(t, error)
@@ -121,8 +121,8 @@ func TestProcessPostedWithErrorWhileUpdating(t *testing.T) {
 	eventService := newEventService(&main)
 
 	row := createRow([]string{"POSTED", "05.05.1991 20:20", "topicChannel", "Timestamp"})
-	mockMessageBuilder.On("createEventPost", row).Return(createBuffer())
-	mockSlackService.On("updateMessage", "topicChannel", "Timestamp", "~createEventPost~").Return("nil", "nil", "nil", errors.New("errorFromMock"))
+	mockMessageBuilder.On("create", row).Return(createBuffer())
+	mockSlackService.On("updateMessage", "topicChannel", "Timestamp", "~create~").Return("nil", "nil", "nil", errors.New("errorFromMock"))
 
 	error := eventService.processPosted(row, topicConfig, 0)
 	assert.NotNil(t, error)
@@ -144,8 +144,8 @@ func TestProcessUpdate(t *testing.T) {
 	eventService := newEventService(&main)
 
 	row := createRow([]string{"UPDATE", "05.05.1991 20:20", "topicChannel", "Timestamp"})
-	mockMessageBuilder.On("createEventPost", row).Return(createBuffer())
-	mockSlackService.On("updateMessage", "topicChannel", "Timestamp", "createEventPost").Return("nil", "nil", "nil", nil)
+	mockMessageBuilder.On("create", row).Return(createBuffer())
+	mockSlackService.On("updateMessage", "topicChannel", "Timestamp", "create").Return("nil", "nil", "nil", nil)
 	mockSpreadsheetService.On("writeCell", "topicSheet", 0, main.config.StatusColumn, "POSTED").Return()
 
 	error := eventService.processUpdate(row, topicConfig, 0)
@@ -165,8 +165,8 @@ func TestProcessUpdateErrorWhileUpdating(t *testing.T) {
 	eventService := newEventService(&main)
 
 	row := createRow([]string{"UPDATE", "05.05.1991 20:20", "topicChannel", "Timestamp"})
-	mockMessageBuilder.On("createEventPost", row).Return(createBuffer())
-	mockSlackService.On("updateMessage", "topicChannel", "Timestamp", "createEventPost").Return("nil", "nil", "nil", errors.New("errorFromMock"))
+	mockMessageBuilder.On("create", row).Return(createBuffer())
+	mockSlackService.On("updateMessage", "topicChannel", "Timestamp", "create").Return("nil", "nil", "nil", errors.New("errorFromMock"))
 
 	error := eventService.processUpdate(row, topicConfig, 0)
 	assert.NotNil(t, error)
@@ -196,7 +196,7 @@ func createConfig() *Config {
 
 func createBuffer() bytes.Buffer {
 	var buffer bytes.Buffer
-	buffer.WriteString("createEventPost")
+	buffer.WriteString("create")
 	return buffer
 }
 

@@ -12,7 +12,7 @@ import (
 
 type IMessageBuilder interface {
 	createTrainingPost(row []interface{}) bytes.Buffer
-	createEventPost(row []interface{}) bytes.Buffer
+	create(row []interface{}) bytes.Buffer
 	createTrainingMgmtPost(row []interface{}, params trainingParameters) bytes.Buffer
 	createTrainingParams(reactions []slack.ItemReaction) trainingParameters
 }
@@ -48,7 +48,7 @@ func (messageBuilder MessageBuilder) createTrainingPost(row []interface{}) bytes
 	return buffer
 }
 
-func (messageBuilder MessageBuilder) createEventPost(row []interface{}) bytes.Buffer {
+func (messageBuilder MessageBuilder) create(row []interface{}) bytes.Buffer {
 	var buffer bytes.Buffer
 
 	meetingTime, error := time.Parse("02.01.2006 15:04", row[messageBuilder.config.DateColumn].(string))

@@ -53,7 +53,7 @@ func (messageBuilder MockMessageBuilder) createTrainingPost(row []interface{}) b
 	return buffer
 }
 
-func (messageBuilder MockMessageBuilder) createEventPost(row []interface{}) bytes.Buffer {
+func (messageBuilder MockMessageBuilder) create(row []interface{}) bytes.Buffer {
 	args := messageBuilder.Called(row)
 	return args.Get(0).(bytes.Buffer)
 }
