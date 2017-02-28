@@ -14,7 +14,6 @@ type Main struct {
 	spreadsheetService *SpreadsheetService
 	messageBuilder     *MessageBuilder
 	eventService       *EventService
-	trainingService    *TrainingService
 	IMessageBuilder
 	ISlackService
 	ISpreadsheetService
@@ -35,7 +34,6 @@ func main() {
 	instance.ISlackService = newSlackService(instance.config.SlackKey)
 	instance.IMessageBuilder = newMessageBuilder(instance.config, instance.slackService)
 	instance.ISpreadsheetService = newSpreadsheetService()
-	instance.trainingService = newTrainingService(&instance)
 	instance.eventService = newEventService(&instance)
 
 	instance.run()
@@ -44,7 +42,5 @@ func main() {
 }
 
 func (main Main) run() {
-	main.trainingService.process()
-
 	main.eventService.process()
 }
