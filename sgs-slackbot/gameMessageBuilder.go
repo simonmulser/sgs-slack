@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/golang/glog"
-	"github.com/nlopes/slack"
 )
 
 // GameMessageBuilder helps you to build messages
@@ -18,11 +17,6 @@ func newGameMessageBuilder(config *Config) *GameMessageBuilder {
 	messageBuilder.config = config
 
 	return messageBuilder
-}
-
-func (messageBuilder GameMessageBuilder) createTrainingPost(row []interface{}) bytes.Buffer {
-	var buffer bytes.Buffer
-	return buffer
 }
 
 func (messageBuilder GameMessageBuilder) create(row []interface{}) bytes.Buffer {
@@ -51,14 +45,4 @@ func (messageBuilder GameMessageBuilder) create(row []interface{}) bytes.Buffer 
 	buffer.WriteString(".")
 
 	return buffer
-}
-
-func (messageBuilder GameMessageBuilder) createTrainingMgmtPost(row []interface{}, params trainingParameters) bytes.Buffer {
-	var buffer bytes.Buffer
-	return buffer
-}
-
-func (messageBuilder GameMessageBuilder) createTrainingParams(reactions []slack.ItemReaction) trainingParameters {
-	var params trainingParameters
-	return params
 }

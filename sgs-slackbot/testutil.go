@@ -48,22 +48,7 @@ type MockMessageBuilder struct {
 	mock.Mock
 }
 
-func (messageBuilder MockMessageBuilder) createTrainingPost(row []interface{}) bytes.Buffer {
-	var buffer bytes.Buffer
-	return buffer
-}
-
 func (messageBuilder MockMessageBuilder) create(row []interface{}) bytes.Buffer {
 	args := messageBuilder.Called(row)
 	return args.Get(0).(bytes.Buffer)
-}
-
-func (messageBuilder MockMessageBuilder) createTrainingMgmtPost(row []interface{}, params trainingParameters) bytes.Buffer {
-	args := messageBuilder.Called(row, params)
-	return args.Get(0).(bytes.Buffer)
-}
-
-func (messageBuilder MockMessageBuilder) createTrainingParams(reactions []slack.ItemReaction) trainingParameters {
-	args := messageBuilder.Called(reactions)
-	return args.Get(0).(trainingParameters)
 }

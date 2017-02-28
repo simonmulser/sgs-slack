@@ -1,10 +1,6 @@
 package main
 
-import (
-	"bytes"
-
-	"github.com/nlopes/slack"
-)
+import "bytes"
 
 // TrainingBuilder helps you to build messages
 type TrainingBuilder struct {
@@ -20,12 +16,6 @@ func newTrainingBuilder(config *Config, slackService ISlackService) *TrainingBui
 	return messageBuilder
 }
 
-func (messageBuilder TrainingBuilder) createTrainingPost(row []interface{}) bytes.Buffer {
-	var buffer bytes.Buffer
-
-	return buffer
-}
-
 func (messageBuilder TrainingBuilder) create(row []interface{}) bytes.Buffer {
 	var buffer bytes.Buffer
 
@@ -36,15 +26,4 @@ func (messageBuilder TrainingBuilder) create(row []interface{}) bytes.Buffer {
 	buffer.WriteString(row[messageBuilder.config.DescriptionColumn].(string))
 
 	return buffer
-}
-
-func (messageBuilder TrainingBuilder) createTrainingMgmtPost(row []interface{}, params trainingParameters) bytes.Buffer {
-	var buffer bytes.Buffer
-	return buffer
-}
-
-func (messageBuilder TrainingBuilder) createTrainingParams(reactions []slack.ItemReaction) trainingParameters {
-	var params trainingParameters
-
-	return params
 }
