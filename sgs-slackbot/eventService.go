@@ -93,11 +93,12 @@ func (eventService EventService) processNew(row []interface{}, topic topicConfig
 			glog.Warningf("Unable to post massage. %v", error)
 			return error
 		}
+		glog.Infof("Posted event from sheet=%s into channel=%s", topic.sheet, topic.channel)
 
 		eventService.ISpreadsheetService.writeCell(topic.sheet, rowNumber, eventService.config.StatusColumn, "POSTED")
 		eventService.ISpreadsheetService.writeCell(topic.sheet, rowNumber, eventService.config.ChannelIDColumn, channelID)
 		eventService.ISpreadsheetService.writeCell(topic.sheet, rowNumber, eventService.config.TimestampColumn, timestamp)
-		glog.Info("posted event and updated sheet")
+		glog.Infof("Updated event with status=POSTED in sheet=%s", topic.sheet)
 	}
 	return nil
 }
@@ -119,9 +120,10 @@ func (eventService EventService) processPosted(row []interface{}, topic topicCon
 			glog.Warningf("Unable to post massage. %v", error)
 			return error
 		}
+		glog.Infof("Crossed out event in channel=%s", topic.channel)
 
 		eventService.ISpreadsheetService.writeCell(topic.sheet, rowNumber, eventService.config.StatusColumn, "OVER")
-		glog.Info("updated event")
+		glog.Infof("Updated event with status=OVER in sheet=%s", topic.sheet)
 	}
 	return nil
 }
@@ -129,13 +131,13 @@ func (eventService EventService) processPosted(row []interface{}, topic topicCon
 func (eventService EventService) processUpdate(row []interface{}, topic topicConfig, rowNumber int) error {
 	message := topic.IMessageBuilder.create(row)
 	_, _, _, error := eventService.ISlackService.updateMessage(row[eventService.config.ChannelIDColumn].(string), row[eventService.config.TimestampColumn].(string), message.String())
-
 	if error != nil {
 		glog.Warningf("Unable to post massage. %v", error)
 		return error
 	}
+	glog.Infof("Updated event in channel=%s", topic.channel)
 
 	eventService.ISpreadsheetService.writeCell(topic.sheet, rowNumber, eventService.config.StatusColumn, "POSTED")
-	glog.Info("updated event")
+	glog.Infof("Updated event with status=POSTED in sheet=%s", topic.sheet)
 	return nil
 }
