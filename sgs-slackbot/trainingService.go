@@ -42,19 +42,22 @@ func (trainingService TrainingService) execute(row []interface{}, topic topicCon
 		reactions, error := trainingService.ISlackService.getReactions(
 			slack.ItemRef{Channel: row[trainingService.config.ChannelIDColumn].(string), Timestamp: row[trainingService.config.TimestampColumn].(string)},
 			slack.GetReactionsParameters{})
-
 		if error != nil {
 			glog.Warningf("Unable to get reactions. %v", error)
 			return error
 		}
+		glog.Infof("Got reactions from post (channel=%s, timestamp=%s)", row[trainingService.config.ChannelIDColumn], row[trainingService.config.TimestampColumn])
 
 		params := trainingService.ITrainingParamsService.create(reactions)
 		message := trainingService.createTrainingMgmtPost(row, params)
 
 		trainingService.ISlackService.postMessage(trainingService.config.TrainingMgmtChannel, message.String())
 		trainingService.ISlackService.postMessage("@"+params.ResponsibleTrainingUtensils, trainingService.config.TrainingUtensilsResponsibleText)
+		glog.Infof("Informed responsible person=%s and posted into channel=%s", params.ResponsibleTrainingUtensils, trainingService.config.TrainingMgmtChannel)
+
 		trainingService.ISpreadsheetService.writeCell(trainingService.config.TrainingSheet, rowNumber, trainingService.config.TrainingUtensilsColumn, "POSTED")
-		glog.Info("selected responsible person and updated sheets")
+		glog.Infof("Updated event with trainings utensils=POSTED in sheet=%s", topic.sheet)
+
 	}
 
 	return nil
