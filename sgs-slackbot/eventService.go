@@ -49,7 +49,7 @@ func newEventService(main *Main) *EventService {
 		main.config.TrainingSheet,
 		main.config.TrainingChannel,
 		newTrainingMessageBuilder(eventService.config),
-		nil,
+		newTrainingService(eventService.config, eventService.ISlackService, eventService.ISpreadsheetService, newTrainingParamsService(eventService.ISlackService)),
 	}
 	eventService.topics = []topicConfig{sgs07, sgs16, training}
 
