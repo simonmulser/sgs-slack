@@ -12,6 +12,7 @@ RUN go get golang.org/x/oauth2
 RUN go get golang.org/x/oauth2/google
 RUN go get google.golang.org/api/sheets/v4
 RUN go get github.com/golang/glog
+RUN go get github.com/stretchr/testify/mock
 
 RUN apt-get update && apt-get install -y \
   cron
