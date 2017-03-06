@@ -37,23 +37,23 @@ type MockSlackService struct {
 	mock.Mock
 }
 
-func (mockSlackService MockSlackService) postMessage(channel string, message string) (string, string, error) {
+func (mockSlackService MockSlackService) PostMessage(channel string, message string) (string, string, error) {
 	args := mockSlackService.Called([]string{channel, message})
 	return args.String(0), args.String(1), args.Error(2)
 }
 
-func (mockSlackService MockSlackService) updateMessage(channel, timestamp, text string) (string, string, string, error) {
+func (mockSlackService MockSlackService) UpdateMessage(channel, timestamp, text string) (string, string, string, error) {
 	args := mockSlackService.Called(channel, timestamp, text)
 	return args.String(0), args.String(1), args.String(2), args.Error(3)
 }
 
-func (mockSlackService MockSlackService) getUserInfo(user string) (*slack.User, error) {
+func (mockSlackService MockSlackService) GetUserInfo(user string) (*slack.User, error) {
 	args := mockSlackService.Called(user)
 	slackUser := args.Get(0).(slack.User)
 	return &slackUser, args.Error(1)
 }
 
-func (mockSlackService MockSlackService) getReactions(item slack.ItemRef, params slack.GetReactionsParameters) ([]slack.ItemReaction, error) {
+func (mockSlackService MockSlackService) GetReactions(item slack.ItemRef, params slack.GetReactionsParameters) ([]slack.ItemReaction, error) {
 	args := mockSlackService.Called(item, params)
 	return args.Get(0).([]slack.ItemReaction), args.Error(1)
 }

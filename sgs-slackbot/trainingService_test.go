@@ -14,8 +14,8 @@ func TestExecute(t *testing.T) {
 	topicConfig, _ := createTopicConfig()
 	mockSlackService := new(MockSlackService)
 	itemRef := slack.ItemRef{Channel: "channelID", Timestamp: "Timestamp"}
-	mockSlackService.On("getReactions", itemRef, slack.GetReactionsParameters{false}).Return([]slack.ItemReaction{}, nil)
-	mockSlackService.On("postMessage", mock.MatchedBy(func(s []string) bool { return true })).Return("channelID", "timestamp", nil)
+	mockSlackService.On("GetReactions", itemRef, slack.GetReactionsParameters{false}).Return([]slack.ItemReaction{}, nil)
+	mockSlackService.On("PostMessage", mock.MatchedBy(func(s []string) bool { return true })).Return("channelID", "timestamp", nil)
 	mockSpreadsheetService := new(MockSpreadsheetService)
 	mockSpreadsheetService.On("writeCell", "", 0, config.TrainingUtensilsColumn, "POSTED").Return()
 
@@ -35,7 +35,7 @@ func TestExecuteErrorFromSlack(t *testing.T) {
 	topicConfig, _ := createTopicConfig()
 	mockSlackService := new(MockSlackService)
 	itemRef := slack.ItemRef{Channel: "channelID", Timestamp: "Timestamp"}
-	mockSlackService.On("getReactions", itemRef, slack.GetReactionsParameters{false}).Return([]slack.ItemReaction{}, errors.New("errorFromMock"))
+	mockSlackService.On("GetReactions", itemRef, slack.GetReactionsParameters{false}).Return([]slack.ItemReaction{}, errors.New("errorFromMock"))
 	mockSpreadsheetService := new(MockSpreadsheetService)
 	mockTrainingParamsService := new(MockTrainingParamsService)
 

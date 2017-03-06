@@ -6,6 +6,7 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/nlopes/slack"
+	"github.com/simonmulser/slackservice"
 )
 
 type ITrainingParamsService interface {
@@ -13,10 +14,10 @@ type ITrainingParamsService interface {
 }
 
 type TrainingParamsService struct {
-	ISlackService
+	slackservice.ISlackService
 }
 
-func newTrainingParamsService(slackService ISlackService) *TrainingParamsService {
+func newTrainingParamsService(slackService slackservice.ISlackService) *TrainingParamsService {
 	trainingService := new(TrainingParamsService)
 	trainingService.ISlackService = slackService
 
@@ -52,7 +53,7 @@ func (trainingParamsService TrainingParamsService) create(reactions []slack.Item
 	params.TotalGoing = strconv.Itoa(countMuscle + countFacepunch)
 
 	if len(going) > 0 {
-		user, error := trainingParamsService.ISlackService.getUserInfo(going[rand.Intn(len(going))])
+		user, error := trainingParamsService.ISlackService.GetUserInfo(going[rand.Intn(len(going))])
 		if error != nil {
 			glog.Fatalf("error: %v", error)
 		}

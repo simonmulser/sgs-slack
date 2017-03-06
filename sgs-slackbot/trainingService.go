@@ -6,6 +6,7 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/nlopes/slack"
+	"github.com/simonmulser/slackservice"
 )
 
 type ITopicCommand interface {
@@ -15,12 +16,12 @@ type ITopicCommand interface {
 // TrainingService processes the trainings
 type TrainingService struct {
 	config *Config
-	ISlackService
+	slackservice.ISlackService
 	ISpreadsheetService
 	ITrainingParamsService
 }
 
-func newTrainingService(config *Config, slackService ISlackService, spreadsheetService ISpreadsheetService, trainingParamsService ITrainingParamsService) *TrainingService {
+func newTrainingService(config *Config, slackService slackservice.ISlackService, spreadsheetService ISpreadsheetService, trainingParamsService ITrainingParamsService) *TrainingService {
 	trainingService := new(TrainingService)
 	trainingService.config = config
 	trainingService.ISlackService = slackService
@@ -39,7 +40,7 @@ func (trainingService TrainingService) execute(row []interface{}, topic topicCon
 	date = date.Add(-8 * 60 * time.Minute)
 
 	if row[trainingService.config.StatusColumn] == "POSTED" && row[trainingService.config.TrainingUtensilsColumn] != "POSTED" && timeNow().After(date) {
-		reactions, error := trainingService.ISlackService.getReactions(
+		reactions, error := trainingService.ISlackService.GetReactions(
 			slack.ItemRef{Channel: row[trainingService.config.ChannelIDColumn].(string), Timestamp: row[trainingService.config.TimestampColumn].(string)},
 			slack.GetReactionsParameters{})
 		if error != nil {
@@ -51,8 +52,8 @@ func (trainingService TrainingService) execute(row []interface{}, topic topicCon
 		params := trainingService.ITrainingParamsService.create(reactions)
 		message := trainingService.createTrainingMgmtPost(row, params)
 
-		trainingService.ISlackService.postMessage(trainingService.config.TrainingMgmtChannel, message.String())
-		trainingService.ISlackService.postMessage("@"+params.ResponsibleTrainingUtensils, trainingService.config.TrainingUtensilsResponsibleText)
+		trainingService.ISlackService.PostMessage(trainingService.config.TrainingMgmtChannel, message.String())
+		trainingService.ISlackService.PostMessage("@"+params.ResponsibleTrainingUtensils, trainingService.config.TrainingUtensilsResponsibleText)
 		glog.Infof("Informed responsible person=%s and posted into channel=%s", params.ResponsibleTrainingUtensils, trainingService.config.TrainingMgmtChannel)
 
 		trainingService.ISpreadsheetService.writeCell(trainingService.config.TrainingSheet, rowNumber, trainingService.config.TrainingUtensilsColumn, "POSTED")
