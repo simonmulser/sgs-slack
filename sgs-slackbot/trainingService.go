@@ -6,6 +6,7 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/nlopes/slack"
+	"github.com/simonmulser/google"
 	"github.com/simonmulser/slackservice"
 )
 
@@ -17,11 +18,11 @@ type ITopicCommand interface {
 type TrainingService struct {
 	config *Config
 	slackservice.ISlackService
-	ISpreadsheetService
+	google.ISpreadsheetService
 	ITrainingParamsService
 }
 
-func newTrainingService(config *Config, slackService slackservice.ISlackService, spreadsheetService ISpreadsheetService, trainingParamsService ITrainingParamsService) *TrainingService {
+func newTrainingService(config *Config, slackService slackservice.ISlackService, spreadsheetService google.ISpreadsheetService, trainingParamsService ITrainingParamsService) *TrainingService {
 	trainingService := new(TrainingService)
 	trainingService.config = config
 	trainingService.ISlackService = slackService
@@ -56,7 +57,7 @@ func (trainingService TrainingService) execute(row []interface{}, topic topicCon
 		trainingService.ISlackService.PostMessage("@"+params.ResponsibleTrainingUtensils, trainingService.config.TrainingUtensilsResponsibleText)
 		glog.Infof("Informed responsible person=%s and posted into channel=%s", params.ResponsibleTrainingUtensils, trainingService.config.TrainingMgmtChannel)
 
-		trainingService.ISpreadsheetService.writeCell(trainingService.config.TrainingSheet, rowNumber, trainingService.config.TrainingUtensilsColumn, "POSTED")
+		trainingService.ISpreadsheetService.WriteCell(trainingService.config.TrainingSheet, rowNumber, trainingService.config.TrainingUtensilsColumn, "POSTED")
 		glog.Infof("Updated event with trainings utensils=POSTED in sheet=%s", topic.sheet)
 
 	}

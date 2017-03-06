@@ -25,9 +25,9 @@ func TestProcessNew(t *testing.T) {
 	row := createRow([]string{"NEW", "05.06.1991 20:04"})
 	mockMessageBuilder.On("create", row).Return(createBuffer())
 	mockSlackService.On("PostMessage", mock.MatchedBy(func(s []string) bool { return true })).Return("channelID", "timestamp", nil)
-	mockSpreadsheetService.On("writeCell", "topicSheet", 0, main.config.StatusColumn, "POSTED").Return()
-	mockSpreadsheetService.On("writeCell", "topicSheet", 0, main.config.ChannelIDColumn, "channelID").Return()
-	mockSpreadsheetService.On("writeCell", "topicSheet", 0, main.config.TimestampColumn, "timestamp").Return()
+	mockSpreadsheetService.On("WriteCell", "topicSheet", 0, main.config.StatusColumn, "POSTED").Return()
+	mockSpreadsheetService.On("WriteCell", "topicSheet", 0, main.config.ChannelIDColumn, "channelID").Return()
+	mockSpreadsheetService.On("WriteCell", "topicSheet", 0, main.config.TimestampColumn, "timestamp").Return()
 
 	error := eventService.processNew(row, topicConfig, 0)
 
@@ -98,7 +98,7 @@ func TestProcessPosted(t *testing.T) {
 	main.ISpreadsheetService = mockSpreadsheetService
 
 	mockSlackService.On("UpdateMessage", "topicChannel", "Timestamp", "~create~").Return("nil", "nil", "nil", nil)
-	mockSpreadsheetService.On("writeCell", "topicSheet", 0, main.config.StatusColumn, "OVER").Return()
+	mockSpreadsheetService.On("WriteCell", "topicSheet", 0, main.config.StatusColumn, "OVER").Return()
 
 	eventService := newEventService(&main)
 
@@ -147,7 +147,7 @@ func TestProcessUpdate(t *testing.T) {
 	row := createRow([]string{"UPDATE", "05.05.1991 20:20", "topicChannel", "Timestamp"})
 	mockMessageBuilder.On("create", row).Return(createBuffer())
 	mockSlackService.On("UpdateMessage", "topicChannel", "Timestamp", "create").Return("nil", "nil", "nil", nil)
-	mockSpreadsheetService.On("writeCell", "topicSheet", 0, main.config.StatusColumn, "POSTED").Return()
+	mockSpreadsheetService.On("WriteCell", "topicSheet", 0, main.config.StatusColumn, "POSTED").Return()
 
 	error := eventService.processUpdate(row, topicConfig, 0)
 	assert.Nil(t, error)

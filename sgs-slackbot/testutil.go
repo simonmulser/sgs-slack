@@ -22,12 +22,12 @@ type MockSpreadsheetService struct {
 	mock.Mock
 }
 
-func (mockSpreadsheetService MockSpreadsheetService) writeCell(sheet string, row int, column int, text string) {
+func (mockSpreadsheetService MockSpreadsheetService) WriteCell(sheet string, row int, column int, text string) {
 	mockSpreadsheetService.Called(sheet, row, column, text)
 	return
 }
 
-func (mockSpreadsheetService MockSpreadsheetService) readRange(sheet string, rangeToRead string) *sheets.ValueRange {
+func (mockSpreadsheetService MockSpreadsheetService) ReadRange(sheet string, rangeToRead string) *sheets.ValueRange {
 	args := mockSpreadsheetService.Called(sheet, rangeToRead)
 	valueRange := args.Get(0).(sheets.ValueRange)
 	return &valueRange

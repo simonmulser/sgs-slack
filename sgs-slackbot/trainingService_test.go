@@ -17,7 +17,7 @@ func TestExecute(t *testing.T) {
 	mockSlackService.On("GetReactions", itemRef, slack.GetReactionsParameters{false}).Return([]slack.ItemReaction{}, nil)
 	mockSlackService.On("PostMessage", mock.MatchedBy(func(s []string) bool { return true })).Return("channelID", "timestamp", nil)
 	mockSpreadsheetService := new(MockSpreadsheetService)
-	mockSpreadsheetService.On("writeCell", "", 0, config.TrainingUtensilsColumn, "POSTED").Return()
+	mockSpreadsheetService.On("WriteCell", "", 0, config.TrainingUtensilsColumn, "POSTED").Return()
 
 	mockTrainingParamsService := new(MockTrainingParamsService)
 	mockTrainingParamsService.On("create", mock.MatchedBy(func(r []slack.ItemReaction) bool { return true })).Return(trainingParameters{"", "", "", ""})

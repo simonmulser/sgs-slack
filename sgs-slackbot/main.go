@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/golang/glog"
+	"github.com/simonmulser/google"
 	"github.com/simonmulser/slackservice"
 )
 
@@ -14,7 +15,7 @@ type Main struct {
 	eventService *EventService
 	IMessageBuilder
 	slackservice.ISlackService
-	ISpreadsheetService
+	google.ISpreadsheetService
 }
 
 func main() {
@@ -30,7 +31,7 @@ func main() {
 	instance := Main{}
 	instance.config = read(env)
 	instance.ISlackService = slackservice.NewSlackService(instance.config.SlackKey)
-	instance.ISpreadsheetService = newSpreadsheetService()
+	instance.ISpreadsheetService = google.NewSpreadsheetService()
 	instance.eventService = newEventService(&instance)
 
 	instance.run()

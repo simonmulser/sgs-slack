@@ -1,4 +1,4 @@
-package main
+package google
 
 import (
 	"strconv"
@@ -8,8 +8,8 @@ import (
 )
 
 type ISpreadsheetService interface {
-	writeCell(sheet string, row int, column int, text string)
-	readRange(sheet string, rangeToRead string) *sheets.ValueRange
+	WriteCell(sheet string, row int, column int, text string)
+	ReadRange(sheet string, rangeToRead string) *sheets.ValueRange
 }
 
 // SpreadsheetService helps you to interact with a sheet
@@ -17,14 +17,14 @@ type SpreadsheetService struct {
 	service *sheets.Service
 }
 
-func newSpreadsheetService() *SpreadsheetService {
+func NewSpreadsheetService() *SpreadsheetService {
 	spreadsheetService := new(SpreadsheetService)
 	spreadsheetService.service = New()
 
 	return spreadsheetService
 }
 
-func (spreadsheetService SpreadsheetService) writeCell(sheet string, row int, column int, text string) {
+func (spreadsheetService SpreadsheetService) WriteCell(sheet string, row int, column int, text string) {
 	var upDateColumns [][]interface{}
 	var updateRows []interface{}
 	upDateColumns = append(upDateColumns, append(updateRows, text))
@@ -38,11 +38,18 @@ func (spreadsheetService SpreadsheetService) writeCell(sheet string, row int, co
 	request.Do()
 }
 
-func (spreadsheetService SpreadsheetService) readRange(sheet string, rangeToRead string) *sheets.ValueRange {
+func (spreadsheetService SpreadsheetService) ReadRange(sheet string, rangeToRead string) *sheets.ValueRange {
 	response, error := spreadsheetService.service.Spreadsheets.Values.Get(sheet, rangeToRead).Do()
 	if error != nil {
 		glog.Fatalf("Unable to retrieve data from sheet. %v", error)
 	}
 
 	return response
+}
+
+var arr = [...]string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
+	"N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"}
+
+func toAlphabetChar(i int) string {
+	return arr[i]
 }

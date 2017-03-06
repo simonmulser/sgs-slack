@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/golang/glog"
+	"github.com/simonmulser/google"
 	"github.com/simonmulser/slackservice"
 )
 
@@ -14,7 +15,7 @@ type EventService struct {
 	topics []topicConfig
 	IMessageBuilder
 	slackservice.ISlackService
-	ISpreadsheetService
+	google.ISpreadsheetService
 }
 
 type topicConfig struct {
@@ -59,7 +60,7 @@ func newEventService(main *Main) *EventService {
 
 func (eventService EventService) process() {
 	for _, topic := range eventService.topics {
-		rows := eventService.ISpreadsheetService.readRange(topic.sheet, "A2:L")
+		rows := eventService.ISpreadsheetService.ReadRange(topic.sheet, "A2:L")
 		if len(rows.Values) > 0 {
 			i := 2
 			for _, row := range rows.Values {
@@ -111,9 +112,9 @@ func (eventService EventService) processNew(row []interface{}, topic topicConfig
 		}
 		glog.Infof("Posted event from sheet=%s into channel=%s", topic.sheet, topic.channel)
 
-		eventService.ISpreadsheetService.writeCell(topic.sheet, rowNumber, eventService.config.StatusColumn, "POSTED")
-		eventService.ISpreadsheetService.writeCell(topic.sheet, rowNumber, eventService.config.ChannelIDColumn, channelID)
-		eventService.ISpreadsheetService.writeCell(topic.sheet, rowNumber, eventService.config.TimestampColumn, timestamp)
+		eventService.ISpreadsheetService.WriteCell(topic.sheet, rowNumber, eventService.config.StatusColumn, "POSTED")
+		eventService.ISpreadsheetService.WriteCell(topic.sheet, rowNumber, eventService.config.ChannelIDColumn, channelID)
+		eventService.ISpreadsheetService.WriteCell(topic.sheet, rowNumber, eventService.config.TimestampColumn, timestamp)
 		glog.Infof("Updated event with status=POSTED in sheet=%s", topic.sheet)
 	}
 	return nil
@@ -138,7 +139,7 @@ func (eventService EventService) processPosted(row []interface{}, topic topicCon
 		}
 		glog.Infof("Crossed out event in channel=%s", topic.channel)
 
-		eventService.ISpreadsheetService.writeCell(topic.sheet, rowNumber, eventService.config.StatusColumn, "OVER")
+		eventService.ISpreadsheetService.WriteCell(topic.sheet, rowNumber, eventService.config.StatusColumn, "OVER")
 		glog.Infof("Updated event with status=OVER in sheet=%s", topic.sheet)
 	}
 	return nil
@@ -153,7 +154,7 @@ func (eventService EventService) processUpdate(row []interface{}, topic topicCon
 	}
 	glog.Infof("Updated event in channel=%s", topic.channel)
 
-	eventService.ISpreadsheetService.writeCell(topic.sheet, rowNumber, eventService.config.StatusColumn, "POSTED")
+	eventService.ISpreadsheetService.WriteCell(topic.sheet, rowNumber, eventService.config.StatusColumn, "POSTED")
 	glog.Infof("Updated event with status=POSTED in sheet=%s", topic.sheet)
 	return nil
 }
