@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/golang/glog"
-	"github.com/nlopes/slack"
+	nlopesslack "github.com/nlopes/slack"
 	"github.com/simonmulser/google"
-	"github.com/simonmulser/slackservice"
+	"github.com/simonmulser/slack"
 )
 
 type ITopicCommand interface {
@@ -17,12 +17,12 @@ type ITopicCommand interface {
 // TrainingService processes the trainings
 type TrainingService struct {
 	config *Config
-	slackservice.ISlackService
+	slack.ISlackService
 	google.ISpreadsheetService
 	ITrainingParamsService
 }
 
-func newTrainingService(config *Config, slackService slackservice.ISlackService, spreadsheetService google.ISpreadsheetService, trainingParamsService ITrainingParamsService) *TrainingService {
+func newTrainingService(config *Config, slackService slack.ISlackService, spreadsheetService google.ISpreadsheetService, trainingParamsService ITrainingParamsService) *TrainingService {
 	trainingService := new(TrainingService)
 	trainingService.config = config
 	trainingService.ISlackService = slackService
@@ -42,8 +42,8 @@ func (trainingService TrainingService) execute(row []interface{}, topic topicCon
 
 	if row[trainingService.config.StatusColumn] == "POSTED" && row[trainingService.config.TrainingUtensilsColumn] != "POSTED" && timeNow().After(date) {
 		reactions, error := trainingService.ISlackService.GetReactions(
-			slack.ItemRef{Channel: row[trainingService.config.ChannelIDColumn].(string), Timestamp: row[trainingService.config.TimestampColumn].(string)},
-			slack.GetReactionsParameters{})
+			nlopesslack.ItemRef{Channel: row[trainingService.config.ChannelIDColumn].(string), Timestamp: row[trainingService.config.TimestampColumn].(string)},
+			nlopesslack.GetReactionsParameters{})
 		if error != nil {
 			glog.Warningf("Unable to get reactions. %v", error)
 			return error

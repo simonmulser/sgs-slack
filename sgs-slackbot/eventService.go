@@ -6,7 +6,7 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/simonmulser/google"
-	"github.com/simonmulser/slackservice"
+	"github.com/simonmulser/slack"
 )
 
 // EventService to process events
@@ -14,7 +14,7 @@ type EventService struct {
 	config *Config
 	topics []topicConfig
 	IMessageBuilder
-	slackservice.ISlackService
+	slack.ISlackService
 	google.ISpreadsheetService
 }
 

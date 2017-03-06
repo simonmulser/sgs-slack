@@ -1,4 +1,4 @@
-package slackservice
+package slack
 
 import (
 	"github.com/nlopes/slack"

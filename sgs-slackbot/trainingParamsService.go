@@ -5,19 +5,19 @@ import (
 	"strconv"
 
 	"github.com/golang/glog"
-	"github.com/nlopes/slack"
-	"github.com/simonmulser/slackservice"
+	nlopesslack "github.com/nlopes/slack"
+	"github.com/simonmulser/slack"
 )
 
 type ITrainingParamsService interface {
-	create(reactions []slack.ItemReaction) trainingParameters
+	create(reactions []nlopesslack.ItemReaction) trainingParameters
 }
 
 type TrainingParamsService struct {
-	slackservice.ISlackService
+	slack.ISlackService
 }
 
-func newTrainingParamsService(slackService slackservice.ISlackService) *TrainingParamsService {
+func newTrainingParamsService(slackService slack.ISlackService) *TrainingParamsService {
 	trainingService := new(TrainingParamsService)
 	trainingService.ISlackService = slackService
 
@@ -31,7 +31,7 @@ type trainingParameters struct {
 	ResponsibleTrainingUtensils string
 }
 
-func (trainingParamsService TrainingParamsService) create(reactions []slack.ItemReaction) trainingParameters {
+func (trainingParamsService TrainingParamsService) create(reactions []nlopesslack.ItemReaction) trainingParameters {
 	var params trainingParameters
 	var going []string
 	countMuscle := 0
