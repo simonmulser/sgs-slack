@@ -1,13 +1,17 @@
 package main
 
-import "bytes"
+import (
+	"bytes"
+
+	"github.com/simonmulser/config"
+)
 
 // TrainingMessageBuilder helps you to build messages
 type TrainingMessageBuilder struct {
-	config *Config
+	config *config.Config
 }
 
-func newTrainingMessageBuilder(config *Config) *TrainingMessageBuilder {
+func newTrainingMessageBuilder(config *config.Config) *TrainingMessageBuilder {
 	messageBuilder := new(TrainingMessageBuilder)
 	messageBuilder.config = config
 

@@ -5,13 +5,14 @@ import (
 	"os"
 
 	"github.com/golang/glog"
+	"github.com/simonmulser/config"
 	"github.com/simonmulser/google"
 	"github.com/simonmulser/slack"
 )
 
 // Main holds all services
 type Main struct {
-	config       *Config
+	config       *config.Config
 	eventService *EventService
 	IMessageBuilder
 	slack.ISlackService
@@ -29,7 +30,7 @@ func main() {
 	}
 
 	instance := Main{}
-	instance.config = read(env)
+	instance.config = config.Read(env)
 	instance.ISlackService = slack.NewSlackService(instance.config.SlackKey)
 	instance.ISpreadsheetService = google.NewSpreadsheetService()
 	instance.eventService = newEventService(&instance)

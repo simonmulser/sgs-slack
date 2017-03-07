@@ -5,14 +5,15 @@ import (
 	"time"
 
 	"github.com/golang/glog"
+	"github.com/simonmulser/config"
 )
 
 // GameMessageBuilder helps you to build messages
 type GameMessageBuilder struct {
-	config *Config
+	config *config.Config
 }
 
-func newGameMessageBuilder(config *Config) *GameMessageBuilder {
+func newGameMessageBuilder(config *config.Config) *GameMessageBuilder {
 	messageBuilder := new(GameMessageBuilder)
 	messageBuilder.config = config
 

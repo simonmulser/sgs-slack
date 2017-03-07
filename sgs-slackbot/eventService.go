@@ -5,13 +5,14 @@ import (
 	"time"
 
 	"github.com/golang/glog"
+	"github.com/simonmulser/config"
 	"github.com/simonmulser/google"
 	"github.com/simonmulser/slack"
 )
 
 // EventService to process events
 type EventService struct {
-	config *Config
+	config *config.Config
 	topics []topicConfig
 	IMessageBuilder
 	slack.ISlackService

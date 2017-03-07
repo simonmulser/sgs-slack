@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"encoding/json"
@@ -36,8 +36,8 @@ type Config struct {
 	SurfaceColumn      int
 }
 
-func read(env string) *Config {
-	file, _ := os.Open("config/config.json")
+func Read(env string) *Config {
+	file, _ := os.Open("../config/config.json")
 	decoder := json.NewDecoder(file)
 	config := Config{}
 	err := decoder.Decode(&config)
@@ -45,7 +45,7 @@ func read(env string) *Config {
 		fmt.Println("error:", err)
 	}
 
-	file, _ = os.Open("config/connections/slack-key.json")
+	file, _ = os.Open("../config/connections/slack-key.json")
 	decoder = json.NewDecoder(file)
 	err = decoder.Decode(&config)
 	if err != nil {
@@ -53,9 +53,9 @@ func read(env string) *Config {
 	}
 
 	if env == "development" {
-		file, _ = os.Open("config/connections/development-config.json")
+		file, _ = os.Open("../config/connections/development-config.json")
 	} else if env == "production" {
-		file, _ = os.Open("config/connections/production-config.json")
+		file, _ = os.Open("../config/connections/production-config.json")
 	} else {
 		fmt.Println("error: unkown env")
 	}

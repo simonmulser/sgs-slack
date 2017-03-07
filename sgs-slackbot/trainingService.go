@@ -6,6 +6,8 @@ import (
 
 	"github.com/golang/glog"
 	nlopesslack "github.com/nlopes/slack"
+	"github.com/simonmulser/config"
+
 	"github.com/simonmulser/google"
 	"github.com/simonmulser/slack"
 )
@@ -16,13 +18,13 @@ type ITopicCommand interface {
 
 // TrainingService processes the trainings
 type TrainingService struct {
-	config *Config
+	config *config.Config
 	slack.ISlackService
 	google.ISpreadsheetService
 	ITrainingParamsService
 }
 
-func newTrainingService(config *Config, slackService slack.ISlackService, spreadsheetService google.ISpreadsheetService, trainingParamsService ITrainingParamsService) *TrainingService {
+func newTrainingService(config *config.Config, slackService slack.ISlackService, spreadsheetService google.ISpreadsheetService, trainingParamsService ITrainingParamsService) *TrainingService {
 	trainingService := new(TrainingService)
 	trainingService.config = config
 	trainingService.ISlackService = slackService
