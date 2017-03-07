@@ -11,8 +11,7 @@ RUN go get github.com/stretchr/testify/mock
 RUN apt-get update && apt-get install -y \
   cron
 
-# Copy the application files (needed for production)
-ADD . /go/src/github.com/simonmulser/sgs-slackbot
+ADD . /go/src/github.com/simonmulser
 RUN go install github.com/simonmulser/sgs-slackbot
 
 RUN mkdir /root/.credentials
