@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/simonmulser/config"
+	"github.com/simonmulser/testutils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -12,15 +12,15 @@ var mainInstance Main
 
 func TestMain(m *testing.M) {
 	mainInstance = Main{}
-	mainInstance.config = createConfig()
+	mainInstance.config = testutils.CreateConfig()
 
 	os.Exit(m.Run())
 }
 
 func TestGetFirstPostedRow1(t *testing.T) {
-	firstRow := createRow([]string{"OVER", "first"})
-	secondRow := createRow([]string{"POSTED", "second"})
-	thirdRow := createRow([]string{"POSTED", "third"})
+	firstRow := testutils.CreateRow([]string{"OVER", "first"})
+	secondRow := testutils.CreateRow([]string{"POSTED", "second"})
+	thirdRow := testutils.CreateRow([]string{"POSTED", "third"})
 
 	var rows [][]interface{}
 	rows = append(rows, firstRow)
@@ -34,9 +34,9 @@ func TestGetFirstPostedRow1(t *testing.T) {
 }
 
 func TestGetFirstPostedRow2(t *testing.T) {
-	firstRow := createRow([]string{"POSTED", "first"})
-	secondRow := createRow([]string{"NEW", "second"})
-	thirdRow := createRow([]string{"OVER", "third"})
+	firstRow := testutils.CreateRow([]string{"POSTED", "first"})
+	secondRow := testutils.CreateRow([]string{"NEW", "second"})
+	thirdRow := testutils.CreateRow([]string{"OVER", "third"})
 
 	var rows [][]interface{}
 	rows = append(rows, firstRow)
@@ -59,8 +59,8 @@ func TestGetFirstPostedRowNowRows(t *testing.T) {
 }
 
 func TestGetFirstPostedRowNowRowsMatching(t *testing.T) {
-	firstRow := createRow([]string{"NEW", "first"})
-	secondRow := createRow([]string{"OVER", "second"})
+	firstRow := testutils.CreateRow([]string{"NEW", "first"})
+	secondRow := testutils.CreateRow([]string{"OVER", "second"})
 
 	var rows [][]interface{}
 	rows = append(rows, firstRow)
@@ -72,18 +72,5 @@ func TestGetFirstPostedRowNowRowsMatching(t *testing.T) {
 	assert.Contains(t, error.Error(), "with status 'POSTED'")
 }
 
-func createRow(data []string) []interface{} {
-	row := make([]interface{}, len(data))
-	for i, s := range data {
-		row[i] = s
-	}
 
-	return row
-}
-
-func createConfig() *config.Config {
-	config := config.Config{
-		StatusColumn: 0,
-	}
-	return &config
 }

@@ -5,12 +5,13 @@ import (
 	"testing"
 
 	"github.com/nlopes/slack"
+	"github.com/simonmulser/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
 func TestExecute(t *testing.T) {
-	config := createConfig()
+	config := testutils.CreateConfig()
 	topicConfig, _ := createTopicConfig()
 	mockSlackService := new(MockSlackService)
 	itemRef := slack.ItemRef{Channel: "channelID", Timestamp: "Timestamp"}
@@ -23,7 +24,7 @@ func TestExecute(t *testing.T) {
 	mockTrainingParamsService.On("create", mock.MatchedBy(func(r []slack.ItemReaction) bool { return true })).Return(trainingParameters{"", "", "", ""})
 
 	trainingService := newTrainingService(config, mockSlackService, mockSpreadsheetService, mockTrainingParamsService)
-	row := createRow([]string{"POSTED", "05.05.1991 20:20", "channelID", "Timestamp", "05.05.1991 20:20", "NOT_POSTED"})
+	row := testutils.CreateRow([]string{"POSTED", "05.05.1991 20:20", "channelID", "Timestamp", "05.05.1991 20:20", "NOT_POSTED"})
 
 	error := trainingService.execute(row, topicConfig, 0)
 
@@ -39,8 +40,8 @@ func TestExecuteErrorFromSlack(t *testing.T) {
 	mockSpreadsheetService := new(MockSpreadsheetService)
 	mockTrainingParamsService := new(MockTrainingParamsService)
 
-	trainingService := newTrainingService(createConfig(), mockSlackService, mockSpreadsheetService, mockTrainingParamsService)
-	row := createRow([]string{"POSTED", "", "channelID", "Timestamp", "05.05.1991 20:20", "NOT_POSTED"})
+	trainingService := newTrainingService(testutils.CreateConfig(), mockSlackService, mockSpreadsheetService, mockTrainingParamsService)
+	row := testutils.CreateRow([]string{"POSTED", "", "channelID", "Timestamp", "05.05.1991 20:20", "NOT_POSTED"})
 
 	error := trainingService.execute(row, topicConfig, 0)
 
@@ -55,8 +56,8 @@ func TestExecuteWrongDate(t *testing.T) {
 	mockSpreadsheetService := new(MockSpreadsheetService)
 	mockTrainingParamsService := new(MockTrainingParamsService)
 
-	trainingService := newTrainingService(createConfig(), mockSlackService, mockSpreadsheetService, mockTrainingParamsService)
-	row := createRow([]string{"", "", "", "", "05.05.1991"})
+	trainingService := newTrainingService(testutils.CreateConfig(), mockSlackService, mockSpreadsheetService, mockTrainingParamsService)
+	row := testutils.CreateRow([]string{"", "", "", "", "05.05.1991"})
 
 	error := trainingService.execute(row, topicConfig, 0)
 
