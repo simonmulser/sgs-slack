@@ -4,6 +4,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/nlopes/slack"
 	"github.com/simonmulser/testutils"
 	"github.com/stretchr/testify/assert"
 )
@@ -72,5 +73,27 @@ func TestGetFirstPostedRowNowRowsMatching(t *testing.T) {
 	assert.Contains(t, error.Error(), "with status 'POSTED'")
 }
 
+func TestCreateEventReactionsSummaryWithNoReactions(t *testing.T) {
+	topic := TopicConfig{"sheet", "name"}
+	row := testutils.CreateRow([]string{"", "", "", "", "date"})
+	reactions := []slack.ItemReaction{}
 
+	summary := mainInstance.createEventReactionsSummary(topic, row, reactions)
+
+	assert.Contains(t, summary, "name")
+	assert.Contains(t, summary, "date")
+	assert.Contains(t, summary, "keine Reaktionen bis jetzt")
+}
+
+func TestCreateEventReactionsSummary(t *testing.T) {
+	topic := TopicConfig{"sheet", "name"}
+	row := testutils.CreateRow([]string{"", "", "", "", "date"})
+	reactions := []slack.ItemReaction{slack.ItemReaction{Name: "smiley", Count: 5}}
+
+	summary := mainInstance.createEventReactionsSummary(topic, row, reactions)
+
+	assert.Contains(t, summary, "name")
+	assert.Contains(t, summary, "date")
+	assert.Contains(t, summary, ":smiley:")
+	assert.Contains(t, summary, "5")
 }
