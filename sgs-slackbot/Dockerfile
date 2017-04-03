@@ -17,7 +17,7 @@ RUN go install github.com/simonmulser/sgs-slackbot
 RUN mkdir /root/.credentials
 COPY token.json /root/.credentials
 
-ADD crontab /etc/cron.d/cron-task
+ADD sgs-slackbot/crontab /etc/cron.d/cron-task
 RUN chmod 0644 /etc/cron.d/cron-task
 RUN touch /var/log/cron.log
 
