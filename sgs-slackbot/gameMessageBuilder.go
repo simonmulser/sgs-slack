@@ -43,7 +43,7 @@ func (messageBuilder GameMessageBuilder) create(row []interface{}) bytes.Buffer 
 	buffer.WriteString(row[messageBuilder.config.LocationColumn].(string))
 	buffer.WriteString(" - ")
 	buffer.WriteString(row[messageBuilder.config.LocationMapsColumn].(string))
-	buffer.WriteString(".")
+	buffer.WriteString(" .")
 
 	return buffer
 }
