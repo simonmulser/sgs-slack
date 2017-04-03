@@ -4,5 +4,9 @@ docker-machine env droplet-docker
 eval $(docker-machine env docker-mulser)
 
 docker build -t slash-commands -f slash-commands/Dockerfile .
-docker run -d slash-commands
-sudo docker exec -it loving_heisenberg /bin/bash
+docker run -d --name slash-commands slash-commands
+sudo docker exec -it slash-commands /bin/bash
+
+docker build -t sgs-slackbot -f sgs-slackbot/Dockerfile .
+docker run -d --name sgs-slackbot sgs-slackbot
+sudo docker exec -it sgs-slackbot /bin/bash
