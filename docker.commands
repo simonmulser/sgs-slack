@@ -7,6 +7,13 @@ docker build -t slash-commands -f slash-commands/Dockerfile .
 docker run -d --name slash-commands slash-commands
 sudo docker exec -it slash-commands /bin/bash
 
+ docker run -d \
+    --name renew-slash-commands \
+    -e "VIRTUAL_HOST=sgs-slack.simonmulser.com" \
+    -e "LETSENCRYPT_HOST=sgs-slack.simonmulser.com" \
+    -e "LETSENCRYPT_EMAIL=simonmulser@gmail.com" \
+    tutum/apache-php
+
 docker build -t sgs-slackbot -f sgs-slackbot/Dockerfile .
 docker run -d --name sgs-slackbot sgs-slackbot
 sudo docker exec -it sgs-slackbot /bin/bash
