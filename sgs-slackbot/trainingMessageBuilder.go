@@ -23,6 +23,8 @@ func (messageBuilder TrainingMessageBuilder) create(row []interface{}) bytes.Buf
 
 	buffer.WriteString(row[messageBuilder.config.NameColumn].(string))
 	buffer.WriteString(" am *")
+	buffer.WriteString(row[messageBuilder.config.DayOfWeekColumn].(string))
+	buffer.WriteString(", ")
 	buffer.WriteString(row[messageBuilder.config.DateColumn].(string))
 	buffer.WriteString("* Uhr! ")
 	buffer.WriteString(row[messageBuilder.config.DescriptionColumn].(string))

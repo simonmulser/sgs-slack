@@ -35,7 +35,7 @@ func newTrainingService(config *config.Config, slackService slack.ISlackService,
 }
 
 func (trainingService TrainingService) execute(row []interface{}, topic topicConfig, rowNumber int) error {
-	date, error := time.Parse("02.01.2006 15:04", row[trainingService.config.DateColumn].(string))
+	date, error := time.Parse("02/01/2006 15:04", row[trainingService.config.DateColumn].(string))
 	if error != nil {
 		glog.Warningf("Unable to parse date. %v", error)
 		return error

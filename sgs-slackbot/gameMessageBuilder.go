@@ -23,7 +23,7 @@ func newGameMessageBuilder(config *config.Config) *GameMessageBuilder {
 func (messageBuilder GameMessageBuilder) create(row []interface{}) bytes.Buffer {
 	var buffer bytes.Buffer
 
-	meetingTime, error := time.Parse("02.01.2006 15:04", row[messageBuilder.config.DateColumn].(string))
+	meetingTime, error := time.Parse("02/01/2006 15:04", row[messageBuilder.config.DateColumn].(string))
 	if error != nil {
 		glog.Fatalf("Unable to parse date. %v", error)
 	}

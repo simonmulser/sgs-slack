@@ -23,6 +23,7 @@ type Config struct {
 	ChannelIDColumn   int
 	TimestampColumn   int
 	DateColumn        int
+	DayOfWeekColumn   int
 
 	TrainingUtensilsColumn          int
 	NameColumn                      int

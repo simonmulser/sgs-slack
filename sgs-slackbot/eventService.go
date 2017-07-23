@@ -98,7 +98,7 @@ func (eventService EventService) process() {
 }
 
 func (eventService EventService) processNew(row []interface{}, topic topicConfig, rowNumber int) error {
-	postingDate, error := time.Parse("02.01.2006 15:04", row[eventService.config.PostingDateColumn].(string))
+	postingDate, error := time.Parse("02/01/2006 15:04", row[eventService.config.PostingDateColumn].(string))
 	if error != nil {
 		glog.Warningf("Unable to parse date. %v", error)
 		return error
@@ -122,7 +122,7 @@ func (eventService EventService) processNew(row []interface{}, topic topicConfig
 }
 
 func (eventService EventService) processPosted(row []interface{}, topic topicConfig, rowNumber int) error {
-	date, error := time.Parse("02.01.2006 15:04", row[eventService.config.DateColumn].(string))
+	date, error := time.Parse("02/01/2006 15:04", row[eventService.config.DateColumn].(string))
 	if error != nil {
 		glog.Warningf("Unable to parse date. %v", error)
 		return error
