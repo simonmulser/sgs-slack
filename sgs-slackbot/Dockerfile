@@ -1,6 +1,6 @@
 FROM golang:1.7
 
-RUN go get github.com/nlopes/slack
+RUN go get -u github.com/nlopes/slack
 RUN go get github.com/robfig/cron
 RUN go get golang.org/x/oauth2
 RUN go get golang.org/x/oauth2/google
