@@ -1,4 +1,4 @@
-FROM golang:1.6
+FROM golang:1.7
 
 RUN go get github.com/nlopes/slack
 RUN go get github.com/robfig/cron
