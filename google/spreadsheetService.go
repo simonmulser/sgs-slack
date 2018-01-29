@@ -52,7 +52,10 @@ func (spreadsheetService SpreadsheetService) WriteCell(sheet string, row int, co
 		toAlphabetChar(column)+strconv.Itoa(row)+":"+toAlphabetChar(column)+strconv.Itoa(row), &valueRange)
 
 	request.ValueInputOption("RAW")
-	request.Do()
+	_, error := request.Do()
+	if error != nil {
+		glog.Fatalf("Unable to update data. %v", error)
+	}
 }
 
 func (spreadsheetService SpreadsheetService) ReadRange(sheet string, rangeToRead string) *sheets.ValueRange {
