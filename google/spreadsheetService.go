@@ -8,6 +8,7 @@ import (
 )
 
 type ISpreadsheetService interface {
+	WriteAll(sheet string, row int, status string, channel string, timestamp string)
 	WriteCell(sheet string, row int, column int, text string)
 	ReadRange(sheet string, rangeToRead string) *sheets.ValueRange
 }
