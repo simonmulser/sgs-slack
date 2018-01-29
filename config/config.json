@@ -1,8 +1,8 @@
 {
 	"StatusColumn": 0,
-	"PostingDateColumn": 1,
-	"ChannelIDColumn": 2,
-	"TimestampColumn": 3,
+	"ChannelIDColumn": 1,
+	"TimestampColumn": 2,
+	"PostingDateColumn": 3,
 	"DateColumn": 4,
 	"DayOfWeekColumn": 5,
 	"TrainingUtensilsColumn": 6,

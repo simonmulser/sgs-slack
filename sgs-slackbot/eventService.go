@@ -113,9 +113,7 @@ func (eventService EventService) processNew(row []interface{}, topic topicConfig
 		}
 		glog.Infof("Posted event from sheet=%s into channel=%s", topic.sheet, topic.channel)
 
-		eventService.ISpreadsheetService.WriteCell(topic.sheet, rowNumber, eventService.config.StatusColumn, "POSTED")
-		eventService.ISpreadsheetService.WriteCell(topic.sheet, rowNumber, eventService.config.ChannelIDColumn, channelID)
-		eventService.ISpreadsheetService.WriteCell(topic.sheet, rowNumber, eventService.config.TimestampColumn, timestamp)
+		eventService.ISpreadsheetService.WriteAll(topic.sheet, rowNumber, "POSTED", channelID, timestamp)
 		glog.Infof("Updated event with status=POSTED in sheet=%s", topic.sheet)
 	}
 	return nil
