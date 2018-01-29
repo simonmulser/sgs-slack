@@ -24,6 +24,23 @@ func NewSpreadsheetService() *SpreadsheetService {
 	return spreadsheetService
 }
 
+func (spreadsheetService SpreadsheetService) WriteAll(sheet string, row int, status string, channel string, timestamp string) {
+	var upDateColumns [][]interface{}
+	var updateRows []interface{}
+	upDateColumns = append(upDateColumns, append(updateRows, status, channel, timestamp))
+
+	valueRange := sheets.ValueRange{Values: upDateColumns}
+
+	request := spreadsheetService.service.Spreadsheets.Values.Update(sheet,
+		"A"+strconv.Itoa(row)+":"+"C"+strconv.Itoa(row), &valueRange)
+
+	request.ValueInputOption("RAW")
+	_, error := request.Do()
+	if error != nil {
+		glog.Fatalf("Unable to update data. %v", error)
+	}
+}
+
 func (spreadsheetService SpreadsheetService) WriteCell(sheet string, row int, column int, text string) {
 	var upDateColumns [][]interface{}
 	var updateRows []interface{}
