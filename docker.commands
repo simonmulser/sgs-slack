@@ -1,7 +1,8 @@
-docker-machine create --driver=generic --generic-ip-address=... --generic-ssh-user=root --generic-ssh-key=/Users/simon/.ssh/... droplet-docker
+docker-machine create --driver digitalocean --digitalocean-access-token ... --digitalocean-region fra1 docker-droplet
 
-docker-machine env droplet-docker
-eval $(docker-machine env docker-mulser)
+docker-machine env docker-droplet
+eval $(docker-machine env docker-droplet)
+eval $(docker-machine env -u)
 
 docker build -t slash-commands -f slash-commands/Dockerfile .
 docker run -d --name slash-commands slash-commands
