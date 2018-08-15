@@ -3,9 +3,9 @@ package main
 import (
 	"errors"
 	"testing"
+	"./testutils"
 
 	"github.com/nlopes/slack"
-	"github.com/simonmulser/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )

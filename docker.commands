@@ -14,7 +14,3 @@ sudo docker exec -it slash-commands /bin/bash
     -e "LETSENCRYPT_HOST=sgs-slack.simonmulser.com" \
     -e "LETSENCRYPT_EMAIL=simonmulser@gmail.com" \
     tutum/apache-php
-
-docker build -t sgs-slackbot -f sgs-slackbot/Dockerfile .
-docker run -d --name sgs-slackbot sgs-slackbot
-docker exec -it sgs-slackbot /bin/bash

@@ -7,6 +7,10 @@ import (
 	"google.golang.org/api/sheets/v4"
 )
 
+
+
+
+
 type ISpreadsheetService interface {
 	WriteAll(sheet string, row int, status string, channel string, timestamp string)
 	WriteCell(sheet string, row int, column int, text string)
@@ -60,9 +64,10 @@ func (spreadsheetService SpreadsheetService) WriteCell(sheet string, row int, co
 }
 
 func (spreadsheetService SpreadsheetService) ReadRange(sheet string, rangeToRead string) *sheets.ValueRange {
+	glog.Info(sheet)
 	response, error := spreadsheetService.service.Spreadsheets.Values.Get(sheet, rangeToRead).Do()
 	if error != nil {
-		glog.Fatalf("Unable to retrieve data from sheet. %v", error)
+		glog.Fatalf("Unabl to retrieve data from sheet. %v", error)
 	}
 
 	return response

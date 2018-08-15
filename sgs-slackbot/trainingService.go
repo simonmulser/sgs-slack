@@ -3,13 +3,12 @@ package main
 import (
 	"bytes"
 	"time"
-
+	"./config"
+	"./google"
+	"./slack"
+	
 	"github.com/golang/glog"
 	nlopesslack "github.com/nlopes/slack"
-	"github.com/simonmulser/config"
-
-	"github.com/simonmulser/google"
-	"github.com/simonmulser/slack"
 )
 
 type ITopicCommand interface {

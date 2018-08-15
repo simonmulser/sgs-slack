@@ -1,4 +1,4 @@
-FROM golang:1.7
+FROM golang:1.10
 
 RUN go get -u github.com/nlopes/slack
 RUN go get github.com/robfig/cron
@@ -11,13 +11,15 @@ RUN go get github.com/stretchr/testify/mock
 RUN apt-get update && apt-get install -y \
   cron
 
-ADD . /go/src/github.com/simonmulser
-RUN go install github.com/simonmulser/sgs-slackbot
-
 RUN mkdir /root/.credentials
 COPY token.json /root/.credentials
 
-ADD sgs-slackbot/crontab /etc/cron.d/cron-task
+RUN mkdir sgs-slackbot
+COPY config sgs-slackbot/config
+COPY client_secret.json sgs-slackbot/.
+COPY sgs-slackbot sgs-slackbot/.
+
+COPY crontab /etc/cron.d/cron-task
 RUN chmod 0644 /etc/cron.d/cron-task
 RUN touch /var/log/cron.log
 

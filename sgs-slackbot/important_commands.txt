@@ -1,0 +1,3 @@
+docker build -t sgs-slackbot .
+docker run -d --name sgs-slackbot sgs-slackbot
+docker exec -it sgs-slackbot /bin/bash

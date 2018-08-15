@@ -2,8 +2,7 @@ package main
 
 import (
 	"bytes"
-
-	"github.com/simonmulser/config"
+	"./config"
 )
 
 // TrainingMessageBuilder helps you to build messages

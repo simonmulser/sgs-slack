@@ -3,11 +3,11 @@ package main
 import (
 	"flag"
 	"os"
+	"./config"
+	"./google"
+	"./slack"
 
 	"github.com/golang/glog"
-	"github.com/simonmulser/config"
-	"github.com/simonmulser/google"
-	"github.com/simonmulser/slack"
 )
 
 // Main holds all services
@@ -34,6 +34,8 @@ func main() {
 	instance.ISlackService = slack.NewSlackService(instance.config.SlackKey)
 	instance.ISpreadsheetService = google.NewSpreadsheetService()
 	instance.eventService = newEventService(&instance)
+
+	glog.Info("1")
 
 	instance.run()
 

@@ -2,8 +2,9 @@ package config
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
+
+	"github.com/golang/glog"
 )
 
 // Config contains all config data
@@ -37,33 +38,51 @@ type Config struct {
 	SurfaceColumn      int
 }
 
+const configFile = "./config/config.json" 
+const slackKeyFile = "./config/connections/slack-key.json"
+const developmentFile = "./config/connections/development-config.json"
+const productionFile = "./config/connections/production-config.json"
+
 func Read(env string) *Config {
-	file, _ := os.Open("../config/config.json")
+	file, err := os.Open(configFile)
+	if err != nil {
+		glog.Fatalf("error: %s", err)
+	}
 	decoder := json.NewDecoder(file)
 	config := Config{}
-	err := decoder.Decode(&config)
-	if err != nil {
-		fmt.Println("error:", err)
-	}
-
-	file, _ = os.Open("../config/connections/slack-key.json")
-	decoder = json.NewDecoder(file)
 	err = decoder.Decode(&config)
 	if err != nil {
-		fmt.Println("error:", err)
+		glog.Fatalf("error: %s", err)
 	}
 
-	if env == "development" {
-		file, _ = os.Open("../config/connections/development-config.json")
-	} else if env == "production" {
-		file, _ = os.Open("../config/connections/production-config.json")
-	} else {
-		fmt.Println("error: unkown env")
+	file, err = os.Open(slackKeyFile)
+	if err != nil {
+		glog.Fatalf("error: %s", err)
 	}
 	decoder = json.NewDecoder(file)
 	err = decoder.Decode(&config)
 	if err != nil {
-		fmt.Println("error:", err)
+		glog.Fatalf("error: %s", err)
+	}
+
+	fileName := ""
+	switch env {
+	case "development":
+		fileName = developmentFile
+	case "production":
+		fileName = productionFile
+	default:
+		glog.Fatalf("unkown environment %s", env)
+	}
+
+	file, err = os.Open(fileName)
+	if err != nil {
+		glog.Fatalf("error: %s", err)
+	}
+	decoder = json.NewDecoder(file)
+	err = decoder.Decode(&config)
+	if err != nil {
+		glog.Fatalf("error: %s", err)
 	}
 
 	return &config

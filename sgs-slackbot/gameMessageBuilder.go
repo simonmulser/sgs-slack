@@ -3,9 +3,9 @@ package main
 import (
 	"bytes"
 	"time"
+	"./config"
 
 	"github.com/golang/glog"
-	"github.com/simonmulser/config"
 )
 
 // GameMessageBuilder helps you to build messages

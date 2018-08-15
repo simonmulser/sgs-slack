@@ -3,11 +3,11 @@ package main
 import (
 	"bytes"
 	"time"
+	"./config"
+	"./google"
+	"./slack"
 
 	"github.com/golang/glog"
-	"github.com/simonmulser/config"
-	"github.com/simonmulser/google"
-	"github.com/simonmulser/slack"
 )
 
 // EventService to process events

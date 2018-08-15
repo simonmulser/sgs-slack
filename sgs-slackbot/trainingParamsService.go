@@ -3,10 +3,10 @@ package main
 import (
 	"math/rand"
 	"strconv"
+	"./slack"
 
 	"github.com/golang/glog"
 	nlopesslack "github.com/nlopes/slack"
-	"github.com/simonmulser/slack"
 )
 
 type ITrainingParamsService interface {
