@@ -24,14 +24,13 @@ func NewSlackService(SlackKey string) *SlackService {
 	return slackService
 }
 
-func (slackService SlackService) PostMessage(channel string, message string) (string, string, error) {
-	params := slack.NewPostMessageParameters()
-	params.AsUser = true
-	return slackService.slack.PostMessage(channel, message, params)
+func (slackService SlackService) PostMessage(channel string, text string) (string, string, error) {
+	msgOption := slack.MsgOptionCompose(slack.MsgOptionAsUser(true), slack.MsgOptionText(text, false))
+	return slackService.slack.PostMessage(channel, msgOption)
 }
 
 func (slackService SlackService) UpdateMessage(channel, timestamp, text string) (string, string, string, error) {
-	return slackService.slack.UpdateMessage(channel, timestamp, text)
+	return slackService.slack.UpdateMessage(channel, timestamp, slack.MsgOptionText(text, false))
 }
 
 func (slackService SlackService) GetUserInfo(user string) (*slack.User, error) {
