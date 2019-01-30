@@ -19,8 +19,5 @@ COPY config sgs-slackbot/config
 COPY client_secret.json sgs-slackbot/.
 COPY sgs-slackbot sgs-slackbot/.
 
-COPY crontab /etc/cron.d/cron-task
-RUN chmod 0644 /etc/cron.d/cron-task
-RUN touch /var/log/cron.log
-
-CMD cron && tail -f /var/log/cron.log
+WORKDIR /go/sgs-slackbot
+ENTRYPOINT ["./sgs-slackbot"]

@@ -1,2 +1,0 @@
-0 * * * * root bash cd /go/sgs-slackbot && ./sgs-slackbot production >> /var/log/cron.log 2>&1
-  

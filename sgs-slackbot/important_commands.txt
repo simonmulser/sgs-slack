@@ -1,3 +1,8 @@
 docker build -t sgs-slackbot .
 docker run -d --name sgs-slackbot sgs-slackbot
 docker exec -it sgs-slackbot /bin/bash
+
+on the docker host create a crontab with:
+crontab -r 
+and add line:
+0 * * * * /usr/bin/docker run sgs-slackbot production >> /tmp/cron_output 2>&1
